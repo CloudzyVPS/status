@@ -1,0 +1,810 @@
+/* ====================================================== Base Color Variables ====================================================== */
+:root {
+	/* ---------- Neutral Gray ---------- */
+	--neutralgray-950: #171717;
+	--neutralgray-900: #1c1c1c;
+	--neutralgray-800: #262626;
+	--neutralgray-700: #333333;
+	--neutralgray-600: #5c5c5c;
+	--neutralgray-500: #7b7b7b;
+	--neutralgray-400: #a3a3a3;
+	--neutralgray-300: #d1d1d1;
+	--neutralgray-200: #ebebeb;
+	--neutralgray-100: #f5f5f5;
+	--neutralgray-50: #f7f7f7;
+	--neutralgray-0: #ffffff;
+	/* ---------- Neutral slate ---------- */
+	--neutralslate-950: #0e121b;
+	--neutralslate-900: #181b25;
+	--neutralslate-800: #222530;
+	--neutralslate-700: #2b303b;
+	--neutralslate-600: #525866;
+	--neutralslate-500: #717784;
+	--neutralslate-400: #99a0ae;
+	--neutralslate-300: #cacfd8;
+	--neutralslate-200: #e1e4ea;
+	--neutralslate-100: #f2f5f8;
+	--neutralslate-50: #f5f7fa;
+	--neutralslate-0: #ffffff;
+	/* ---------- Azure ---------- */
+	--azure-950: #103f60;
+	--azure-900: #174f78;
+	--azure-800: #1a6194;
+	--azure-700: #146fb3;
+	--azure-600: #0680d8;
+	--azure-500: #0095ff;
+	--azure-400: #51b1f6;
+	--azure-300: #8fd0ff;
+	--azure-200: #bde1ff;
+	--azure-100: #d5ebff;
+	--azure-50: #e0efff;
+	/* ---------- Blue ---------- */
+	--blue-950: #122368;
+	--blue-900: #182f8b;
+	--blue-800: #1f3bad;
+	--blue-700: #2547d0;
+	--blue-600: #3559e9;
+	--blue-500: #335cff;
+	--blue-400: #6895ff;
+	--blue-300: #97baff;
+	--blue-200: #c0d5ff;
+	--blue-100: #d5e2ff;
+	--blue-50: #ebf1ff;
+	/* ---------- Orange ---------- */
+	--orange-950: #71330a;
+	--orange-900: #96440d;
+	--orange-800: #b75310;
+	--orange-700: #ce5e12;
+	--orange-600: #e16614;
+	--orange-500: #fa7319;
+	--orange-400: #ffa468;
+	--orange-300: #ffc197;
+	--orange-200: #ffd9c0;
+	--orange-100: #ffe6d5;
+	--orange-50: #fff3eb;
+	/* ---------- Red ---------- */
+	--red-950: #681219;
+	--red-900: #8b1822;
+	--red-800: #ad1f2b;
+	--red-700: #d02533;
+	--red-600: #e93544;
+	--red-500: #fb3748;
+	--red-400: #ff6875;
+	--red-300: #ff97a0;
+	--red-200: #ffc0c5;
+	--red-100: #ffd5d8;
+	--red-50: #ffebec;
+	/* ---------- Green ---------- */
+	--green-950: #0b4627;
+	--green-900: #16643b;
+	--green-800: #1a7544;
+	--green-700: #178c4e;
+	--green-600: #1daf61;
+	--green-500: #1fc16b;
+	--green-400: #3ee089;
+	--green-300: #84ebb4;
+	--green-200: #c2f5da;
+	--green-100: #d0fbe9;
+	--green-50: #e0faec;
+	/* ---------- Yellow ---------- */
+	--yellow-950: #624c18;
+	--yellow-900: #86661d;
+	--yellow-800: #a78025;
+	--yellow-700: #c99a2c;
+	--yellow-600: #e6a819;
+	--yellow-500: #f6b51e;
+	--yellow-400: #ffd268;
+	--yellow-300: #ffe097;
+	--yellow-200: #ffecc0;
+	--yellow-100: #ffefcc;
+	--yellow-50: #fffaeb;
+	/* ---------- purple ---------- */
+	--purple-950: #351a75;
+	--purple-900: #3d1d86;
+	--purple-800: #4c25a7;
+	--purple-700: #5b2cc9;
+	--purple-600: #693ee0;
+	--purple-500: #7d52f4;
+	--purple-400: #8c71f6;
+	--purple-300: #a897ff;
+	--purple-200: #cac0ff;
+	--purple-100: #dcd5ff;
+	--purple-50: #efebff;
+	/* ---------- sky ---------- */
+	--sky-950: #124b68;
+	--sky-900: #18658b;
+	--sky-800: #1f7ead;
+	--sky-700: #2597d0;
+	--sky-600: #35ade9;
+	--sky-500: #47c2ff;
+	--sky-400: #68cdff;
+	--sky-300: #97dcff;
+	--sky-200: #c0eaff;
+	--sky-100: #d5f1ff;
+	--sky-50: #ebf8ff;
+	/* ---------- pink ---------- */
+	--pink-950: #68123d;
+	--pink-900: #8b1852;
+	--pink-800: #ad1f66;
+	--pink-700: #d0257a;
+	--pink-600: #e9358f;
+	--pink-500: #fb4ba3;
+	--pink-400: #ff68b3;
+	--pink-300: #ff97cb;
+	--pink-200: #ffc0df;
+	--pink-100: #ffd5ea;
+	--pink-50: #ffebf4;
+	/* ---------- Teal ---------- */
+	--teal-950: #0b463e;
+	--teal-900: #16645a;
+	--teal-800: #1a7569;
+	--teal-700: #178c7d;
+	--teal-600: #1daf9c;
+	--teal-500: #22d3bb;
+	--teal-400: #3fdec9;
+	--teal-300: #84ebdd;
+	--teal-200: #c2f5ee;
+	--teal-100: #d0fbf5;
+	--teal-50: #e4fbf8;
+	/* ---------- Alpha Colors ---------- */
+	--neutral-alpha-24: rgba(153, 160, 174, 0.24);
+	--neutral-alpha-16: rgba(153, 160, 174, 0.16);
+	--neutral-alpha-10: rgba(153, 160, 174, 0.1);
+	
+	--azure-alpha-24: rgba(0, 149, 255, 0.24);
+	--azure-alpha-16: rgba(0, 149, 255, 0.16);
+	--azure-alpha-10: rgba(0, 149, 255, 0.1);
+	
+	--blue-alpha-24: rgba(71, 108, 255, 0.24);
+	--blue-alpha-16: rgba(71, 108, 255, 0.16);
+	--blue-alpha-10: rgba(71, 108, 255, 0.1);
+	
+	--orange-alpha-24: rgba(250, 115, 25, 0.24);
+	--orange-alpha-16: rgba(250, 115, 25, 0.16);
+	--orange-alpha-10: rgba(250, 115, 25, 0.1);
+	
+	--red-alpha-24: rgba(251, 55, 72, 0.24);
+	--red-alpha-16: rgba(251, 55, 72, 0.16);
+	--red-alpha-10: rgba(251, 55, 72, 0.1);
+	
+	--green-alpha-24: rgba(31, 193, 107, 0.24);
+	--green-alpha-16: rgba(31, 193, 107, 0.16);
+	--green-alpha-10: rgba(31, 193, 107, 0.1);
+	
+	--yellow-alpha-24: rgba(251, 198, 75, 0.24);
+	--yellow-alpha-16: rgba(251, 198, 75, 0.16);
+	--yellow-alpha-10: rgba(251, 198, 75, 0.1);
+	
+	--sky-alpha-24: rgba(71, 194, 255, 0.24);
+	--sky-alpha-16: rgba(71, 194, 255, 0.16);
+	--sky-alpha-10: rgba(71, 194, 255, 0.1);
+	
+	--purple-alpha-24: rgba(120, 77, 239, 0.24);
+	--purple-alpha-16: rgba(120, 77, 239, 0.16);
+	--purple-alpha-10: rgba(120, 77, 239, 0.1);
+	
+	--pink-alpha-24: rgba(251, 75, 163, 0.24);
+	--pink-alpha-16: rgba(251, 75, 163, 0.16);
+	--pink-alpha-10: rgba(251, 75, 163, 0.1);
+	
+	--teal-alpha-24: rgba(34, 211, 187, 0.24);
+	--teal-alpha-16: rgba(34, 211, 187, 0.16);
+	--teal-alpha-10: rgba(34, 211, 187, 0.1);
+	
+	--white-alpha-24: rgba(255, 255, 255, 0.24);
+	--white-alpha-16: rgba(255, 255, 255, 0.16);
+	--white-alpha-10: rgba(255, 255, 255, 0.1);
+	
+	--black-alpha-24: rgba(23, 23, 23, 0.24);
+	--black-alpha-16: rgba(23, 23, 23, 0.16);
+	--black-alpha-10: rgba(23, 23, 23, 0.1);
+	
+	/* ---------- Shadow Color Variables ---------- */
+	--shadow-color-gray: rgba(51, 51, 51, 1); /* --neutralgray-700 */
+	--shadow-color-dark: rgba(14, 18, 27, 1); /* Close to --neutralslate-950 */
+	--shadow-color-darker: rgba(10, 13, 20, 1); /* Close to --neutralslate-950 */
+	--shadow-color-button: rgba(27, 28, 29, 1); /* Close to --neutralslate-900 */
+	
+	/* ---------- primary Color Tokens ---------- */
+	--primary-dark: var(--azure-800);
+	--primary-darker: var(--azure-700);
+	--primary-base: var(--azure-500);
+	--primary-alpha-24: var(--azure-alpha-24);
+	--primary-alpha-16: var(--azure-alpha-16);
+	--primary-alpha-10: var(--azure-alpha-10);
+	--static-black: var(--neutralslate-950);
+	--static-white: var(--neutralslate-0);
+	
+	/* ---------- shadows ---------- */
+	/* Regular shadows */
+	--regular-shadow-xsmall: 0px 1px 2px 0px rgba(10, 13, 20, 0.03);
+	--regular-shadow-medium: 0px 16px 32px -12px rgba(14, 18, 27, 0.1);
+	/* Custom shadows */
+	--custom-shadow-large: 0px 0px 0px 1px rgba(51, 51, 51, 0.04), 0px 1px 1px 0.5px rgba(51, 51, 51, 0.04), 0px 3px 3px -1.5px rgba(51, 51, 51, 0.02), 0px 6px 6px -3px rgba(51, 51, 51, 0.04), 0px 12px 12px -6px rgba(51, 51, 51, 0.04), 0px 24px 24px -12px rgba(51, 51, 51, 0.04), 0px 48px 48px -24px rgba(51, 51, 51, 0.04), 0px 96px 96px -32px rgba(51, 51, 51, 0.06), inset 0px -1px 1px -0.5px rgba(51, 51, 51, 0.06);
+	--custom-shadow-medium: 0px 0px 0px 1px rgba(51, 51, 51, 0.04), 0px 1px 1px 0.5px rgba(51, 51, 51, 0.04), 0px 3px 3px -1.5px rgba(51, 51, 51, 0.02), 0px 6px 6px -3px rgba(51, 51, 51, 0.04), 0px 12px 12px -6px rgba(51, 51, 51, 0.04), 0px 24px 24px -12px rgba(51, 51, 51, 0.04), 0px 48px 48px -24px rgba(51, 51, 51, 0.04), inset 0px -1px 1px -0.5px rgba(51, 51, 51, 0.06);
+	--custom-shadow-small: 0px 0px 0px 1px rgba(51, 51, 51, 0.04), 0px 16px 8px -8px rgba(51, 51, 51, 0.01), 0px 12px 6px -6px rgba(51, 51, 51, 0.02), 0px 5px 5px -2.5px rgba(51, 51, 51, 0.08), 0px 1px 3px -1.5px rgba(51, 51, 51, 0.16), inset 0px -0.5px 0.5px rgba(51, 51, 51, 0.08);
+	--custom-shadow-xsmall: 0px 0px 0px 1px rgba(51, 51, 51, 0.04), 0px 4px 8px -2px rgba(51, 51, 51, 0.06), 0px 2px 4px rgba(51, 51, 51, 0.04), 0px 1px 2px rgba(51, 51, 51, 0.04), inset 0px -1px 1px -0.5px rgba(51, 51, 51, 0.06);
+	/* Button shadows */
+	--fancy-buttons-neutral-shadow: 0 1px 2px 0 rgba(27, 28, 29, 0.48), 0 0 0 1px var(--neutralslate-800);
+	--fancy-buttons-primary-shadow: 0 1px 2px 0 rgba(14, 18, 27, 0.24), 0 0 0 1px var(--primary-base);
+	--fancy-buttons-error-shadow: 0 1px 2px 0 rgba(14, 18, 27, 0.24), 0 0 0 1px var(--state-error-base);
+	--fancy-buttons-stroke-shadow: 0 1px 3px 0 rgba(14, 18, 27, 0.12), 0 0 0 1px var(--stroke-soft);
+	/* Others */
+	--toggle-switch-box-shadow: 0 6px 10px 0 rgba(14, 18, 27, 0.06), 0 2px 4px 0 rgba(14, 18, 27, 0.03);
+	--tooltip-box-shadow: 0 1px 1px 0.5px rgba(23, 23, 23, 0.04), 0 3px 3px -1.5px rgba(23, 23, 23, 0.02), 0 6px 6px -3px rgba(23, 23, 23, 0.04), 0 12px 12px -6px rgba(23, 23, 23, 0.04), 0 24px 24px -12px rgba(23, 23, 23, 0.04), 0 48px 48px -24px rgba(23, 23, 23, 0.04), 0 0 0 1px var(--stroke-soft, var(--neutralslate-200)), 0 -1px 1px -0.5px rgba(23, 23, 23, 0.06) inset;
+
+	/* ---------- Radius ---------- */
+	--radius-0: 0px;
+	--radius-2: 2px;
+	--radius-4: 4px;
+	--radius-6: 6px;
+	--radius-8: 8px;
+	--radius-10: 10px;
+	--radius-12: 12px;
+	--radius-16: 16px;
+	--radius-20: 20px;
+	--radius-24: 24px;
+	--radius-28: 28px;
+	--radius-full: 999px;
+	/* ---------- Animation durations ---------- */
+	--animation-extra-fast: 100ms;
+	--animation-fast: 200ms;
+	--animation-normal: 300ms;
+	--animation-slow: 400ms;
+	--animation-extra-slow: 500ms;
+	/* ---------- Animation easing ---------- */
+	--animation-ease-out: ease-out;
+	/* ---------- Animation type ---------- */
+	--animation-type: dissolve;
+
+	/* ---------- Button Backgrounds ---------- */
+	--fancy-neutral-default-background: linear-gradient(180deg, rgba(255, 255, 255, 0.16) 0%, rgba(255, 255, 255, 0.00) 100%), var(--bg-strong);
+	--fancy-neutral-hover-background: linear-gradient(180deg, rgba(255, 255, 255, 0.36) 0%, rgba(255, 255, 255, 0.00) 100%), var(--bg-strong);
+	--fancy-neutral-focus-background: linear-gradient(180deg, rgba(255, 255, 255, 0.00) 0%, rgba(255, 255, 255, 0.16) 100%), var(--bg-strong);
+	--fancy-primary-default-background: linear-gradient(180deg, rgba(255, 255, 255, 0.16) 0%, rgba(255, 255, 255, 0.00) 100%), var(--primary-base);
+	--fancy-primary-hover-background: linear-gradient(180deg, rgba(255, 255, 255, 0.36) 0%, rgba(255, 255, 255, 0.00) 100%), var(--primary-base);
+	--fancy-primary-focus-background: linear-gradient(180deg, rgba(255, 255, 255, 0.00) 0%, rgba(255, 255, 255, 0.16) 100%), var(--primary-base);
+	--fancy-error-default-background: linear-gradient(180deg, rgba(255, 255, 255, 0.16) 0%, rgba(255, 255, 255, 0.00) 100%), var(--state-error-base);
+	--fancy-error-hover-background: linear-gradient(180deg, rgba(255, 255, 255, 0.36) 0%, rgba(255, 255, 255, 0.00) 100%), var(--state-error-base);
+	--fancy-error-focus-background: linear-gradient(180deg, rgba(255, 255, 255, 0.00) 0%, rgba(255, 255, 255, 0.16) 100%), var(--state-error-base);
+
+	/* ---------- linears ---------- */
+	--linear-12: linear-gradient(180deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.00) 100%);
+	--linear-24: linear-gradient(180deg, rgba(255, 255, 255, 0.24) 0%, rgba(255, 255, 255, 0.00) 100%);
+	--linear-36: linear-gradient(180deg, rgba(255, 255, 255, 0.36) 0%, rgba(255, 255, 255, 0.00) 100%);
+	--linear-48: linear-gradient(180deg, rgba(255, 255, 255, 0.48) 0%, rgba(255, 255, 255, 0.00) 100%);
+	--linear-60: linear-gradient(180deg, rgba(255, 255, 255, 0.60) 0%, rgba(255, 255, 255, 0.00) 100%);
+	--linear-72: linear-gradient(180deg, rgba(255, 255, 255, 0.72) 0%, rgba(255, 255, 255, 0.00) 100%);
+	--linear-84: linear-gradient(180deg, rgba(255, 255, 255, 0.84) 0%, rgba(255, 255, 255, 0.00) 100%);
+	--linear-96: linear-gradient(180deg, rgba(255, 255, 255, 0.96) 0%, rgba(255, 255, 255, 0.00) 100%);
+	
+	/* ---------- Focus Rings ---------- */
+	--buttons-primary-focus-ring: 0 0 0 2px var(--static-white), 0 0 0 4px var(--primary-alpha-24);
+	--buttons-important-focus-ring: 0 0 0 2px var(--static-white), 0 0 0 4px var(--primary-alpha-24);
+	--buttons-error-focus-ring: 0 0 0 2px var(--static-white), 0 0 0 4px var(--red-alpha-24);
+
+}
+
+/* ====================================================== Theme Tokens (light & Dark) ====================================================== */
+/* ---------- light mode ---------- */
+:root[data-theme="light"] {
+	/* Background */
+	--bg-background: var(--neutralslate-0);
+	--bg-strong: var(--neutralslate-950);
+	--bg-surface: var(--neutralslate-800);
+	--bg-sub: var(--neutralslate-300);
+	--bg-soft: var(--neutralslate-200);
+	--bg-weak: var(--neutralslate-50);
+	--bg-white: var(--neutralslate-0);
+	/* Text */
+	--text-strong: var(--neutralslate-950);
+	--text-sub: var(--neutralslate-600);
+	--text-soft: var(--neutralslate-400);
+	--text-disabled: var(--neutralslate-300);
+	--text-white: var(--neutralslate-0);
+	/* stroke */
+	--stroke-strong: var(--neutralslate-950);
+	--stroke-sub: var(--neutralslate-300);
+	--stroke-soft: var(--neutralslate-200);
+	--stroke-white: var(--neutralslate-0);
+	/* Icon */
+	--icon-strong: var(--neutralslate-950);
+	--icon-sub: var(--neutralslate-600);
+	--icon-soft: var(--neutralslate-400);
+	--icon-disabled: var(--neutralslate-300);
+	--icon-white: var(--neutralslate-0);
+	/* state Colors */
+	--state-faded-dark: var(--neutralslate-800);
+	--state-faded-base: var(--neutralslate-500);
+	--state-faded-light: var(--neutralslate-200);
+	--state-faded-lighter: var(--neutralslate-100);
+	--state-information-dark: var(--blue-950);
+	--state-information-base: var(--blue-500);
+	--state-information-light: var(--blue-200);
+	--state-information-lighter: var(--blue-50);
+	--state-warning-dark: var(--orange-950);
+	--state-warning-base: var(--orange-500);
+	--state-warning-light: var(--orange-200);
+	--state-warning-lighter: var(--orange-50);
+	--state-error-dark: var(--red-950);
+	--state-error-base: var(--red-500);
+	--state-error-light: var(--red-200);
+	--state-error-lighter: var(--red-50);
+	--state-success-dark: var(--green-950);
+	--state-success-base: var(--green-500);
+	--state-success-light: var(--green-200);
+	--state-success-lighter: var(--green-50);
+	--state-away-dark: var(--yellow-950);
+	--state-away-base: var(--yellow-500);
+	--state-away-light: var(--yellow-200);
+	--state-away-lighter: var(--yellow-50);
+	--state-feature-dark: var(--purple-950);
+	--state-feature-base: var(--purple-500);
+	--state-feature-light: var(--purple-200);
+	--state-feature-lighter: var(--purple-50);
+	--state-verified-dark: var(--sky-950);
+	--state-verified-base: var(--sky-500);
+	--state-verified-light: var(--sky-200);
+	--state-verified-lighter: var(--sky-50);
+	--state-highlighted-dark: var(--pink-950);
+	--state-highlighted-base: var(--pink-500);
+	--state-highlighted-light: var(--pink-200);
+	--state-highlighted-lighter: var(--pink-50);
+	--state-stable-dark: var(--teal-950);
+	--state-stable-base: var(--teal-500);
+	--state-stable-light: var(--teal-200);
+	--state-stable-lighter: var(--teal-50);
+}
+
+/* ---------- Dark mode ---------- */
+:root[data-theme="dark"] {
+	/* Background */
+	--bg-background: var(--neutralslate-950);
+	--bg-strong: var(--neutralslate-0);
+	--bg-surface: var(--neutralslate-200);
+	--bg-sub: var(--neutralslate-600);
+	--bg-soft: var(--neutralslate-700);
+	--bg-weak: var(--neutralslate-800);
+	--bg-white: var(--neutralslate-950);
+	/* Text */
+	--text-strong: var(--neutralslate-0);
+	--text-sub: var(--neutralslate-400);
+	--text-soft: var(--neutralslate-500);
+	--text-disabled: var(--neutralslate-600);
+	--text-white: var(--neutralslate-950);
+	/* stroke */
+	--stroke-strong: var(--neutralslate-0);
+	--stroke-sub: var(--neutralslate-600);
+	--stroke-soft: var(--neutralslate-700);
+	--stroke-white: var(--neutralslate-950);
+	/* Icon */
+	--icon-strong: var(--neutralslate-0);
+	--icon-sub: var(--neutralslate-400);
+	--icon-soft: var(--neutralslate-500);
+	--icon-disabled: var(--neutralslate-600);
+	--icon-white: var(--neutralslate-950);
+	/* state Colors */
+	--state-faded-dark: var(--neutralslate-300);
+	--state-faded-base: var(--neutralslate-500);
+	--state-faded-light: var(--neutral-alpha-24);
+	--state-faded-lighter: var(--neutral-alpha-16);
+	--state-information-dark: var(--blue-400);
+	--state-information-base: var(--blue-500);
+	--state-information-light: var(--blue-alpha-24);
+	--state-information-lighter: var(--blue-alpha-16);
+	--state-warning-dark: var(--orange-400);
+	--state-warning-base: var(--orange-600);
+	--state-warning-light: var(--orange-alpha-24);
+	--state-warning-lighter: var(--orange-alpha-16);
+	--state-error-dark: var(--red-400);
+	--state-error-base: var(--red-600);
+	--state-error-light: var(--red-alpha-24);
+	--state-error-lighter: var(--red-alpha-16);
+	--state-success-dark: var(--green-400);
+	--state-success-base: var(--green-600);
+	--state-success-light: var(--green-alpha-24);
+	--state-success-lighter: var(--green-alpha-16);
+	--state-away-dark: var(--yellow-400);
+	--state-away-base: var(--yellow-600);
+	--state-away-light: var(--yellow-alpha-24);
+	--state-away-lighter: var(--yellow-alpha-16);
+	--state-feature-dark: var(--purple-400);
+	--state-feature-base: var(--purple-500);
+	--state-feature-light: var(--purple-alpha-24);
+	--state-feature-lighter: var(--purple-alpha-16);
+	--state-verified-dark: var(--sky-400);
+	--state-verified-base: var(--sky-600);
+	--state-verified-light: var(--sky-alpha-24);
+	--state-verified-lighter: var(--sky-alpha-16);
+	--state-highlighted-dark: var(--pink-400);
+	--state-highlighted-base: var(--pink-600);
+	--state-highlighted-light: var(--pink-alpha-24);
+	--state-highlighted-lighter: var(--pink-alpha-16);
+	--state-stable-dark: var(--teal-400);
+	--state-stable-base: var(--teal-600);
+	--state-stable-light: var(--teal-alpha-24);
+	--state-stable-lighter: var(--teal-alpha-16);
+}
+
+/* ====================================================== Typography ====================================================== */
+:root {
+	--font-family-base: 'interVF', Inter;
+	--font-family-display: 'Inter Display', 'interVF', Inter;
+	/* ================== Titles ================== */
+	--title-h1-size: 64px;
+	--title-h1-line-height: 72px;
+	--title-h1-weight: 600;
+	--title-h1-letter-spacing: -0.02em;
+	--title-h2-size: 48px;
+	--title-h2-line-height: 56px;
+	--title-h2-weight: 600;
+	--title-h2-letter-spacing: -0.02em;
+	--title-h3-size: 40px;
+	--title-h3-line-height: 48px;
+	--title-h3-weight: 500;
+	--title-h3-letter-spacing: -0.01em;
+	--title-h4-size: 32px;
+	--title-h4-line-height: 40px;
+	--title-h4-weight: 500;
+	--title-h4-letter-spacing: -0.005em;
+	--title-h5-size: 24px;
+	--title-h5-line-height: 32px;
+	--title-h5-weight: 500;
+	--title-h5-letter-spacing: 0em;
+	--title-h6-size: 20px;
+	--title-h6-line-height: 28px;
+	--title-h6-weight: 500;
+	--title-h6-letter-spacing: 0em;
+	/* ================== labels ================== */
+	--label-xlarge-size: 24px;
+	--label-xlarge-line-height: 32px;
+	--label-xlarge-weight: 500;
+	--label-xlarge-letter-spacing: -0.015em;
+	--label-large-size: 18px;
+	--label-large-line-height: 24px;
+	--label-large-weight: 500;
+	--label-large-letter-spacing: -0.015em;
+	--label-medium-size: 16px;
+	--label-medium-line-height: 24px;
+	--label-medium-weight: 500;
+	--label-medium-letter-spacing: -0.011em;
+	--label-small-size: 14px;
+	--label-small-line-height: 20px;
+	--label-small-weight: 500;
+	--label-small-letter-spacing: -0.006em;
+	--label-xsmall-size: 12px;
+	--label-xsmall-line-height: 16px;
+	--label-xsmall-weight: 500;
+	--label-xsmall-letter-spacing: 0em;
+	/* ================== paragraphs ================== */
+	--paragraph-xlarge-size: 24px;
+	--paragraph-xlarge-line-height: 32px;
+	--paragraph-xlarge-weight: 400;
+	--paragraph-xlarge-letter-spacing: -0.015em;
+	--paragraph-large-size: 18px;
+	--paragraph-large-line-height: 24px;
+	--paragraph-large-weight: 400;
+	--paragraph-large-letter-spacing: -0.015em;
+	--paragraph-medium-size: 16px;
+	--paragraph-medium-line-height: 24px;
+	--paragraph-medium-weight: 400;
+	--paragraph-medium-letter-spacing: -0.011em;
+	--paragraph-small-size: 14px;
+	--paragraph-small-line-height: 20px;
+	--paragraph-small-weight: 400;
+	--paragraph-small-letter-spacing: -0.006em;
+	--paragraph-xsmall-size: 12px;
+	--paragraph-xsmall-line-height: 16px;
+	--paragraph-xsmall-weight: 400;
+	--paragraph-xsmall-letter-spacing: 0em;
+	/* ================== subheadings ================== */
+	--subheading-medium-size: 16px;
+	--subheading-medium-line-height: 24px;
+	--subheading-medium-weight: 500;
+	--subheading-medium-letter-spacing: 0.06em;
+	--subheading-small-size: 14px;
+	--subheading-small-line-height: 20px;
+	--subheading-small-weight: 500;
+	--subheading-small-letter-spacing: 0.06em;
+	--subheading-xsmall-size: 12px;
+	--subheading-xsmall-line-height: 16px;
+	--subheading-xsmall-weight: 500;
+	--subheading-xsmall-letter-spacing: 0.04em;
+	--subheading-2xsmall-size: 11px;
+	--subheading-2xsmall-line-height: 12px;
+	--subheading-2xsmall-weight: 500;
+	--subheading-2xsmall-letter-spacing: 0.02em;
+	/* ================== Docs ================== */
+	--docs-label-size: 18px;
+	--docs-label-line-height: 32px;
+	--docs-label-weight: 500;
+	--docs-label-letter-spacing: -0.015em;
+	--docs-paragraph-size: 18px;
+	--docs-paragraph-line-height: 32px;
+	--docs-paragraph-weight: 400;
+	--docs-paragraph-letter-spacing: -0.015em;
+}
+
+/* ====================================================== Utility Classes for Typography ====================================================== */
+@keyframes dissolve {
+	from {
+		opacity: 0;
+	}
+
+	to {
+		opacity: 1;
+	}
+}
+/* ---------- titles ---------- */
+.title-h1 {
+	font-family: var(--font-family-display);
+	font-size: var(--title-h1-size);
+	font-weight: var(--title-h1-weight);
+	line-height: var(--title-h1-line-height);
+	letter-spacing: var(--title-h1-letter-spacing);
+}
+
+.title-h2 {
+	font-family: var(--font-family-display);
+	font-size: var(--title-h2-size);
+	font-weight: var(--title-h2-weight);
+	line-height: var(--title-h2-line-height);
+	letter-spacing: var(--title-h2-letter-spacing);
+}
+
+.title-h3 {
+	font-family: var(--font-family-display);
+	font-size: var(--title-h3-size);
+	font-weight: var(--title-h3-weight);
+	line-height: var(--title-h3-line-height);
+	letter-spacing: var(--title-h3-letter-spacing);
+}
+
+.title-h4 {
+	font-family: var(--font-family-display);
+	font-size: var(--title-h4-size);
+	font-weight: var(--title-h4-weight);
+	line-height: var(--title-h4-line-height);
+	letter-spacing: var(--title-h4-letter-spacing);
+}
+
+.title-h5 {
+	font-family: var(--font-family-display);
+	font-size: var(--title-h5-size);
+	font-weight: var(--title-h5-weight);
+	line-height: var(--title-h5-line-height);
+	letter-spacing: var(--title-h5-letter-spacing);
+}
+
+.title-h6 {
+	font-family: var(--font-family-display);
+	font-size: var(--title-h6-size);
+	font-weight: var(--title-h6-weight);
+	line-height: var(--title-h6-line-height);
+	letter-spacing: var(--title-h6-letter-spacing);
+}
+
+/* ---------- labels ---------- */
+.label-xlarge {
+	font-family: var(--font-family-base);
+	font-size: var(--label-xlarge-size);
+	font-weight: var(--label-xlarge-weight);
+	line-height: var(--label-xlarge-line-height);
+	letter-spacing: var(--label-xlarge-letter-spacing);
+}
+
+.label-large {
+	font-family: var(--font-family-base);
+	font-size: var(--label-large-size);
+	font-weight: var(--label-large-weight);
+	line-height: var(--label-large-line-height);
+	letter-spacing: var(--label-large-letter-spacing);
+}
+
+.label-medium {
+	font-family: var(--font-family-base);
+	font-size: var(--label-medium-size);
+	font-weight: var(--label-medium-weight);
+	line-height: var(--label-medium-line-height);
+	letter-spacing: var(--label-medium-letter-spacing);
+}
+
+.label-small {
+	font-family: var(--font-family-base);
+	font-size: var(--label-small-size);
+	font-weight: var(--label-small-weight);
+	line-height: var(--label-small-line-height);
+	letter-spacing: var(--label-small-letter-spacing);
+}
+
+.label-xsmall {
+	font-family: var(--font-family-base);
+	font-size: var(--label-xsmall-size);
+	font-weight: var(--label-xsmall-weight);
+	line-height: var(--label-xsmall-line-height);
+	letter-spacing: var(--label-xsmall-letter-spacing);
+}
+
+/* ---------- paragraphs ---------- */
+.paragraph-xlarge {
+	font-family: var(--font-family-base);
+	font-size: var(--paragraph-xlarge-size);
+	font-weight: var(--paragraph-xlarge-weight);
+	line-height: var(--paragraph-xlarge-line-height);
+	letter-spacing: var(--paragraph-xlarge-letter-spacing);
+}
+
+.paragraph-large {
+	font-family: var(--font-family-base);
+	font-size: var(--paragraph-large-size);
+	font-weight: var(--paragraph-large-weight);
+	line-height: var(--paragraph-large-line-height);
+	letter-spacing: var(--paragraph-large-letter-spacing);
+}
+
+.paragraph-medium {
+	font-family: var(--font-family-base);
+	font-size: var(--paragraph-medium-size);
+	font-weight: var(--paragraph-medium-weight);
+	line-height: var(--paragraph-medium-line-height);
+	letter-spacing: var(--paragraph-medium-letter-spacing);
+}
+
+.paragraph-small {
+	font-family: var(--font-family-base);
+	font-size: var(--paragraph-small-size);
+	font-weight: var(--paragraph-small-weight);
+	line-height: var(--paragraph-small-line-height);
+	letter-spacing: var(--paragraph-small-letter-spacing);
+}
+
+.paragraph-xsmall {
+	font-family: var(--font-family-base);
+	font-size: var(--paragraph-xsmall-size);
+	font-weight: var(--paragraph-xsmall-weight);
+	line-height: var(--paragraph-xsmall-line-height);
+	letter-spacing: var(--paragraph-xsmall-letter-spacing);
+}
+
+/* ---------- Subheadings ---------- */
+.subheading-medium {
+	font-family: var(--font-family-base);
+	font-size: var(--subheading-medium-size);
+	font-weight: var(--subheading-medium-weight);
+	line-height: var(--subheading-medium-line-height);
+	letter-spacing: var(--subheading-medium-letter-spacing);
+	text-transform: uppercase;
+}
+
+.subheading-small {
+	font-family: var(--font-family-base);
+	font-size: var(--subheading-small-size);
+	font-weight: var(--subheading-small-weight);
+	line-height: var(--subheading-small-line-height);
+	letter-spacing: var(--subheading-small-letter-spacing);
+	text-transform: uppercase;
+}
+
+.subheading-xsmall {
+	font-family: var(--font-family-base);
+	font-size: var(--subheading-xsmall-size);
+	font-weight: var(--subheading-xsmall-weight);
+	line-height: var(--subheading-xsmall-line-height);
+	letter-spacing: var(--subheading-xsmall-letter-spacing);
+	text-transform: uppercase;
+}
+
+.subheading-2xsmall {
+	font-family: var(--font-family-base);
+	font-size: var(--subheading-2xsmall-size);
+	font-weight: var(--subheading-2xsmall-weight);
+	line-height: var(--subheading-2xsmall-line-height);
+	letter-spacing: var(--subheading-2xsmall-letter-spacing);
+	text-transform: uppercase;
+}
+
+/* ---------- Docs ---------- */
+.docs-label {
+	font-family: var(--font-family-base);
+	font-size: var(--docs-label-size);
+	font-weight: var(--docs-label-weight);
+	line-height: var(--docs-label-line-height);
+	letter-spacing: var(--docs-label-letter-spacing);
+}
+
+.docs-paragraph {
+	font-family: var(--font-family-base);
+	font-size: var(--docs-paragraph-size);
+	font-weight: var(--docs-paragraph-weight);
+	line-height: var(--docs-paragraph-line-height);
+	letter-spacing: var(--docs-paragraph-letter-spacing);
+}
+
+/* ---------- shadows ---------- */
+.regular-shadow-xsmall {box-shadow: var(--regular-shadow-xsmall);}
+.regular-shadow-medium {box-shadow: var(--regular-shadow-medium);}
+.custom-shadow-large {box-shadow: var(--custom-shadow-large);}
+.custom-shadow-medium {box-shadow: var(--custom-shadow-medium);}
+.custom-shadow-small {box-shadow: var(--custom-shadow-small);}
+.custom-shadow-xsmall {box-shadow: var(--custom-shadow-xsmall);}
+
+/* ---------- linear Background Gradients ---------- */
+.linear-12-background {background: var(--linear-12);}
+.linear-24-background {background: var(--linear-24);}
+.linear-36-background {background: var(--linear-36);}
+.linear-48-background {background: var(--linear-48);}
+.linear-60-background {background: var(--linear-60);}
+.linear-72-background {background: var(--linear-72);}
+.linear-84-background {background: var(--linear-84);}
+.linear-96-background {background: var(--linear-96);}
+
+/* ---------- linear Borders Gradients ---------- */
+.linear-12-border {border-color: var(--linear-12);}
+.linear-24-border {border-color: var(--linear-24);}
+.linear-36-border {border-color: var(--linear-36);}
+.linear-48-border {border-color: var(--linear-48);}
+.linear-60-border {border-color: var(--linear-60);}
+.linear-72-border {border-color: var(--linear-72);}
+.linear-84-border {border-color: var(--linear-84);}
+.linear-96-border {border-color: var(--linear-96);}
+
+/* ---------- Button ---------- */
+.btn-disable{background: var(--bg-weak);color: var(--text-disabled);}
+
+/*primary Filled*/
+.btn-primary-filled{background: var(--primary-base);color: var(--static-white);}
+.btn-primary-filled:hover{background: var(--primary-darker);}
+.btn-primary-filled:focus{background: var(--primary-base); box-shadow: var(--buttons-primary-focus-ring)}
+/*primary stroke*/
+.btn-primary-stroke{background: var(--bg-white);color: var(--primary-base);border: 1px solid var(--primary-base);}
+.btn-primary-stroke:hover{background: var(--primary-alpha-10);}
+.btn-primary-stroke:focus{background: var(--bg-white);box-shadow: var(--buttons-primary-focus-ring);border: 1px solid var(--bg-soft);}
+/*primary lighter*/
+.btn-primary-lighter{background: var(--primary-alpha-10); color: var(--primary-base);}
+.btn-primary-lighter:hover{background: var(--bg-white);border: 1px solid var(--bg-soft);}
+.btn-primary-lighter:focus{background: var(--bg-white);box-shadow: var(--buttons-primary-focus-ring);border: 1px solid var(--bg-soft);}
+/*primary Ghost*/
+.btn-primary-ghost{background: transparent; color: var(--primary-base);}
+.btn-primary-ghost:hover{background: var(--primary-alpha-10);}
+.btn-primary-ghost:focus{background: var(--bg-white);box-shadow: var(--buttons-primary-focus-ring);border: 1px solid var(--bg-soft);}
+
+/*Neutral Filled*/
+.btn-neutral-filled{background: var(--bg-surface);color: var(--text-white);}
+.btn-neutral-filled:hover{background: var(--bg-strong);}
+.btn-neutral-filled:focus{background: var(--bg-surface); box-shadow: var(--buttons-important-focus-ring)}
+/*Neutral stroke*/
+.btn-neutral-stroke{background: var(--bg-white);color: var(--text-sub);border: 1px solid var(--stroke-soft);box-shadow: var(--regular-shadow-xsmall);}
+.btn-neutral-stroke:hover{background: var(--bg-weak);color: var(--text-strong);}
+.btn-neutral-stroke:focus{background: var(--bg-white);color: var(--text-strong); box-shadow: var(--buttons-important-focus-ring); border: 1px solid var(--stroke-strong);}
+/*Neutral lighter*/
+.btn-neutral-lighter{background: var(--bg-weak); color: var(--text-sub);}
+.btn-neutral-lighter:hover{background: var(--bg-white);border: 1px solid var(--stroke-soft);color: var(--text-strong); box-shadow: var(--regular-shadow-xsmall);}
+.btn-neutral-lighter:focus{background: var(--bg-white);box-shadow: var(--buttons-important-focus-ring);border: 1px solid var(--stroke-strong);}
+/*Neutral Ghost*/
+.btn-neutral-ghost{background: transparent; color: var(--text-sub);}
+.btn-neutral-ghost:hover{background: var(--bg-weak);color: var(--text-strong);}
+.btn-neutral-ghost:focus{background: var(--bg-white);box-shadow: var(--buttons-important-focus-ring);border: 1px solid var(--stroke-strong);}
+
+/*Error Filled*/
+.btn-error-filled{background: var(--state-error-base);color: var(--static-white);}
+.btn-error-filled:hover{background: var(--red-700);}
+.btn-error-filled:focus{background: var(--state-error-base);box-shadow: var(--buttons-error-focus-ring);}
+/*Error stroke*/
+.btn-error-stroke{background: var(--bg-white);border: 1px solid var(--state-error-base);color: var(--state-error-base);}
+.btn-error-stroke:hover{background: var(--red-alpha-10); color: var(--state-error-base);}
+.btn-error-stroke:focus{background-color: var(--bg-white);border: 1px solid var(--state-error-base);box-shadow: var(--buttons-error-focus-ring);}
+/*Error lighter*/
+.btn-error-lighter{background: var(--red-alpha-10);color: var(--state-error-base);}
+.btn-error-lighter:hover{color: var(--state-error-base);background: var(--bg-white);border: 1px solid var(--state-error-base);}
+.btn-error-lighter:focus{color: var(--state-error-base);background: var(--bg-white);border: 1px solid var(--state-error-base);box-shadow: var(--buttons-error-focus-ring);}
+/*Error Ghost*/
+.btn-error-ghost{color: var(--state-error-base);background-color: transparent;}
+.btn-error-ghost:hover{color: var(--state-error-base);background: var(--red-alpha-10);}
+.btn-error-ghost:focus{color: var(--state-error-base);background: var(--bg-white);border: 1px solid var(--state-error-base);box-shadow: var(--buttons-error-focus-ring);}
+
+/* ---------- Toggle switch ---------- */
+.toggle-switch {box-shadow: var(--toggle-switch-box-shadow);}
+
+/* ---------- Tooltip ---------- */
+.tooltip {box-shadow: var(--tooltip-box-shadow);}
+
