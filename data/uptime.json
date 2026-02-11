@@ -1,0 +1,101 @@
+{
+  "days": 30,
+  "regions": {
+    "Dallas": [
+      "operational", "operational", "operational", "operational", "operational",
+      "operational", "operational", "operational", "operational", "operational",
+      "operational", "operational", "operational", "operational", "operational",
+      "operational", "operational", "operational", "operational", "operational",
+      "operational", "operational", "operational", "operational", "operational",
+      "operational", "operational", "operational", "operational", "operational"
+    ],
+    "New York": [
+      "operational", "operational", "operational", "operational", "operational",
+      "operational", "operational", "operational", "operational", "operational",
+      "operational", "operational", "degraded", "operational", "operational",
+      "operational", "operational", "operational", "operational", "operational",
+      "operational", "operational", "operational", "operational", "operational",
+      "operational", "operational", "operational", "operational", "degraded"
+    ],
+    "Los Angeles": [
+      "operational", "operational", "operational", "operational", "operational",
+      "operational", "operational", "operational", "operational", "operational",
+      "operational", "operational", "operational", "operational", "operational",
+      "operational", "operational", "operational", "operational", "operational",
+      "operational", "operational", "operational", "operational", "operational",
+      "operational", "operational", "operational", "operational", "operational"
+    ],
+    "Miami": [
+      "operational", "operational", "operational", "operational", "operational",
+      "operational", "operational", "operational", "operational", "operational",
+      "operational", "operational", "operational", "operational", "operational",
+      "operational", "operational", "operational", "operational", "operational",
+      "operational", "operational", "operational", "operational", "operational",
+      "operational", "operational", "operational", "degraded", "operational"
+    ],
+    "Las Vegas": [
+      "operational", "operational", "operational", "operational", "operational",
+      "operational", "operational", "operational", "operational", "operational",
+      "operational", "operational", "operational", "operational", "operational",
+      "operational", "operational", "operational", "operational", "operational",
+      "operational", "operational", "operational", "operational", "operational",
+      "operational", "operational", "operational", "operational", "maintenance"
+    ],
+    "Utah": [
+      "operational", "operational", "operational", "operational", "operational",
+      "operational", "operational", "operational", "operational", "operational",
+      "operational", "operational", "operational", "operational", "operational",
+      "operational", "operational", "operational", "operational", "operational",
+      "degraded", "operational", "operational", "operational", "operational",
+      "operational", "operational", "operational", "operational", "operational"
+    ],
+    "London": [
+      "operational", "operational", "operational", "operational", "operational",
+      "operational", "operational", "operational", "operational", "operational",
+      "operational", "operational", "operational", "operational", "operational",
+      "operational", "operational", "operational", "operational", "operational",
+      "operational", "operational", "operational", "operational", "operational",
+      "operational", "operational", "operational", "operational", "operational"
+    ],
+    "Frankfurt": [
+      "operational", "operational", "operational", "operational", "operational",
+      "operational", "operational", "operational", "operational", "operational",
+      "operational", "operational", "operational", "operational", "operational",
+      "operational", "operational", "operational", "operational", "operational",
+      "operational", "operational", "degraded", "operational", "operational",
+      "operational", "operational", "operational", "operational", "operational"
+    ],
+    "Amsterdam": [
+      "operational", "operational", "operational", "operational", "operational",
+      "operational", "operational", "operational", "operational", "operational",
+      "operational", "operational", "operational", "operational", "operational",
+      "operational", "operational", "operational", "operational", "operational",
+      "operational", "operational", "operational", "operational", "operational",
+      "operational", "operational", "operational", "operational", "operational"
+    ],
+    "Bern": [
+      "operational", "operational", "operational", "operational", "operational",
+      "operational", "operational", "operational", "operational", "operational",
+      "operational", "operational", "outage", "operational", "operational",
+      "operational", "operational", "operational", "operational", "operational",
+      "operational", "operational", "operational", "degraded", "operational",
+      "operational", "operational", "operational", "operational", "outage"
+    ],
+    "Dubai": [
+      "operational", "operational", "operational", "operational", "operational",
+      "operational", "operational", "operational", "operational", "operational",
+      "operational", "operational", "operational", "operational", "operational",
+      "operational", "operational", "operational", "degraded", "operational",
+      "operational", "operational", "operational", "operational", "operational",
+      "operational", "operational", "operational", "operational", "operational"
+    ],
+    "Singapore": [
+      "operational", "operational", "operational", "operational", "operational",
+      "operational", "operational", "operational", "operational", "operational",
+      "operational", "operational", "operational", "operational", "operational",
+      "operational", "operational", "operational", "operational", "operational",
+      "operational", "operational", "operational", "operational", "operational",
+      "operational", "operational", "operational", "operational", "operational"
+    ]
+  }
+}

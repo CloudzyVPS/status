@@ -104,6 +104,21 @@
             color: var(--state-success-base);
         }
 
+        .global-status-chip.degraded {
+            background: var(--state-away-lighter);
+            color: var(--state-away-base);
+        }
+
+        .global-status-chip.outage {
+            background: var(--state-error-lighter);
+            color: var(--state-error-base);
+        }
+
+        .global-status-chip.maintenance {
+            background: var(--state-information-lighter);
+            color: var(--state-information-base);
+        }
+
         .global-status-chip .status-dot {
             width: 8px;
             height: 8px;
@@ -451,6 +466,24 @@
             background: var(--state-success-lighter);
             color: var(--state-success-base);
             border: 1px solid var(--state-success-base);
+        }
+
+        .status-badge-large.degraded {
+            background: var(--state-away-lighter);
+            color: var(--state-away-base);
+            border: 1px solid var(--state-away-base);
+        }
+
+        .status-badge-large.outage {
+            background: var(--state-error-lighter);
+            color: var(--state-error-base);
+            border: 1px solid var(--state-error-base);
+        }
+
+        .status-badge-large.maintenance {
+            background: var(--state-information-lighter);
+            color: var(--state-information-base);
+            border: 1px solid var(--state-information-base);
         }
 
         .status-badge-large .check-icon {
@@ -1579,37 +1612,11 @@
             scrolledZoom: 38
         };
 
-        // Corrected region coordinates with country flags emoji
-        const REGIONS = [
-            { name: 'Utah', lat: 32.76, lon: 60.89, color: 0xD5EBFF, flag: '🇺🇸' },
-            { name: 'Bern', lat: 45.95, lon: -87.447, color: 0xD5EBFF, flag: '🇨🇭' },
-            { name: 'New York', lat: 40.71, lon: 6.01, color: 0xD5EBFF, flag: '🇺🇸' },
-            { name: 'Miami', lat: 17.76, lon: 25.19, color: 0xD5EBFF, flag: '🇺🇸' },
-            { name: 'Dallas', lat: 25.78, lon: 40.80, color: 0xD5EBFF, flag: '🇺🇸' },
-            { name: 'Frankfurt', lat: 50.11, lon: -95.68, color: 0xD5EBFF, flag: '🇩🇪' },
-            { name: 'Las Vegas', lat: 30.17, lon: 70.14, color: 0xD5EBFF, flag: '🇺🇸' },
-            { name: 'Amsterdam', lat: 52.37, lon: -78.90, color: 0xD5EBFF, flag: '🇳🇱' },
-            { name: 'Dubai', lat: 16.00, lon: 215.99, color: 0xD5EBFF, flag: '🇦🇪' },
-            { name: 'Los Angeles', lat: 50.05, lon: 65.24, color: 0xD5EBFF, flag: '🇺🇸' },
-            { name: 'London', lat: 50.51, lon: -69.13, color: 0xD5EBFF, flag: '🇬🇧' },
-            { name: 'Singapore', lat: -10.35, lon: 155.82, color: 0xD5EBFF, flag: '🇸🇬' }
-        ];
+        // Region coordinates - loaded from data/regions.json
+        let REGIONS = [];
 
-        // Network delays
-        const NETWORK_DELAYS = {
-            'Utah': { 'Bern': 142, 'New York': 52, 'Miami': 68, 'Dallas': 32, 'Frankfurt': 148, 'Las Vegas': 18, 'Amsterdam': 152, 'Dubai': 245, 'Los Angeles': 28, 'London': 138, 'Singapore': 198 },
-            'Bern': { 'Utah': 142, 'New York': 92, 'Miami': 118, 'Dallas': 128, 'Frankfurt': 12, 'Las Vegas': 158, 'Amsterdam': 18, 'Dubai': 112, 'Los Angeles': 162, 'London': 22, 'Singapore': 168 },
-            'New York': { 'Utah': 52, 'Bern': 92, 'Miami': 28, 'Dallas': 38, 'Frankfurt': 88, 'Las Vegas': 62, 'Amsterdam': 82, 'Dubai': 198, 'Los Angeles': 68, 'London': 72, 'Singapore': 238 },
-            'Miami': { 'Utah': 68, 'Bern': 118, 'New York': 28, 'Dallas': 28, 'Frankfurt': 108, 'Las Vegas': 58, 'Amsterdam': 102, 'Dubai': 218, 'Los Angeles': 62, 'London': 92, 'Singapore': 252 },
-            'Dallas': { 'Utah': 32, 'Bern': 128, 'New York': 38, 'Miami': 28, 'Frankfurt': 122, 'Las Vegas': 28, 'Amsterdam': 118, 'Dubai': 228, 'Los Angeles': 32, 'London': 108, 'Singapore': 218 },
-            'Frankfurt': { 'Utah': 148, 'Bern': 12, 'New York': 88, 'Miami': 108, 'Dallas': 122, 'Las Vegas': 152, 'Amsterdam': 8, 'Dubai': 98, 'Los Angeles': 158, 'London': 14, 'Singapore': 162 },
-            'Las Vegas': { 'Utah': 18, 'Bern': 158, 'New York': 62, 'Miami': 58, 'Dallas': 28, 'Frankfurt': 152, 'Amsterdam': 158, 'Dubai': 258, 'Los Angeles': 8, 'London': 148, 'Singapore': 188 },
-            'Amsterdam': { 'Utah': 152, 'Bern': 18, 'New York': 82, 'Miami': 102, 'Dallas': 118, 'Frankfurt': 8, 'Las Vegas': 158, 'Dubai': 108, 'Los Angeles': 162, 'London': 12, 'Singapore': 172 },
-            'Dubai': { 'Utah': 245, 'Bern': 112, 'New York': 198, 'Miami': 218, 'Dallas': 228, 'Frankfurt': 98, 'Las Vegas': 258, 'Amsterdam': 108, 'Los Angeles': 268, 'London': 102, 'Singapore': 68 },
-            'Los Angeles': { 'Utah': 28, 'Bern': 162, 'New York': 68, 'Miami': 62, 'Dallas': 32, 'Frankfurt': 158, 'Las Vegas': 8, 'Amsterdam': 162, 'Dubai': 268, 'London': 152, 'Singapore': 178 },
-            'London': { 'Utah': 138, 'Bern': 22, 'New York': 72, 'Miami': 92, 'Dallas': 108, 'Frankfurt': 14, 'Las Vegas': 148, 'Amsterdam': 12, 'Dubai': 102, 'Los Angeles': 152, 'Singapore': 178 },
-            'Singapore': { 'Utah': 198, 'Bern': 168, 'New York': 238, 'Miami': 252, 'Dallas': 218, 'Frankfurt': 162, 'Las Vegas': 188, 'Amsterdam': 172, 'Dubai': 68, 'Los Angeles': 178, 'London': 178 }
-        };
+        // Network delays - loaded from data/latency.json
+        let NETWORK_DELAYS = {};
 
         // Scene setup
         const globeContainer = document.getElementById('globe-container');
@@ -1862,11 +1869,6 @@
             };
         }
 
-        REGIONS.forEach(r => regionMarkers.push(createRegionMarker(r)));
-
-        // Apply initial theme to globe after all elements are created
-        setTimeout(() => updateGlobeTheme(), 100);
-
         // ============ PERSISTENT ARCS (lighter on load) ============
         const persistentArcs = [];
         const arcsGroup = new THREE.Group();
@@ -1911,18 +1913,6 @@
             arcsGroup.add(arc);
             return { arc, mat, curve, pts };
         }
-
-        // Create lighter persistent arcs
-        const connections = [
-            ['New York', 'London'], ['New York', 'Los Angeles'], ['London', 'Frankfurt'],
-            ['London', 'Dubai'], ['Frankfurt', 'Singapore'], ['Dubai', 'Singapore'],
-            ['Los Angeles', 'Las Vegas'], ['Los Angeles', 'Dallas'], ['Amsterdam', 'London'],
-            ['Dallas', 'Miami'], ['Utah', 'Las Vegas'], ['Bern', 'Frankfurt']
-        ];
-        connections.forEach(([a, b]) => {
-            const sa = regionMarkers.find(r => r.name === a), sb = regionMarkers.find(r => r.name === b);
-            if (sa && sb) persistentArcs.push(createPersistentArc(sa, sb));
-        });
 
         // ============ DATA PACKET ANIMATION ============
         const dataPackets = [];
@@ -2052,9 +2042,29 @@
                 packet.glow.scale.setScalar(pulse * 1.1);
             });
         }
-        
-        // Initialize packets after arcs are created
-        initDataPackets();
+
+        // initGlobeRegions() is called after data is loaded from JSON
+        function initGlobeRegions() {
+            REGIONS.forEach(r => regionMarkers.push(createRegionMarker(r)));
+
+            // Apply initial theme to globe after all elements are created
+            setTimeout(() => updateGlobeTheme(), 100);
+
+            // Create persistent arcs between regions
+            const connections = [
+                ['New York', 'London'], ['New York', 'Los Angeles'], ['London', 'Frankfurt'],
+                ['London', 'Dubai'], ['Frankfurt', 'Singapore'], ['Dubai', 'Singapore'],
+                ['Los Angeles', 'Las Vegas'], ['Los Angeles', 'Dallas'], ['Amsterdam', 'London'],
+                ['Dallas', 'Miami'], ['Utah', 'Las Vegas'], ['Bern', 'Frankfurt']
+            ];
+            connections.forEach(([a, b]) => {
+                const sa = regionMarkers.find(r => r.name === a), sb = regionMarkers.find(r => r.name === b);
+                if (sa && sb) persistentArcs.push(createPersistentArc(sa, sb));
+            });
+
+            // Initialize packets after arcs are created
+            initDataPackets();
+        }
 
         // ============ HOVER ARCS (Pre-computed for smooth performance) ============
         let hoveredRegion = null;
@@ -2089,15 +2099,17 @@
             return { points: pts, startR, endR };
         }
 
-        // Pre-compute all arcs between all region pairs
-        regionMarkers.forEach(startR => {
-            regionMarkers.forEach(endR => {
-                if (startR !== endR) {
-                    const key = `${startR.name}->${endR.name}`;
-                    precomputedArcs.set(key, precomputeArcData(startR, endR));
-                }
+        // Pre-compute all arcs between all region pairs (called after initGlobeRegions)
+        function precomputeAllArcs() {
+            regionMarkers.forEach(startR => {
+                regionMarkers.forEach(endR => {
+                    if (startR !== endR) {
+                        const key = `${startR.name}->${endR.name}`;
+                        precomputedArcs.set(key, precomputeArcData(startR, endR));
+                    }
+                });
             });
-        });
+        }
 
         // Active hover arc objects
         let activeHoverArcs = [];
@@ -2373,122 +2385,14 @@
         updateTimestamp();
         setInterval(updateTimestamp, 60000);
 
-        // Region data with status - detailed incident/maintenance info
-        const REGION_STATUS_DATA = [
-            { 
-                name: 'Dallas', code: 'DAL1', flag: '🇺🇸', status: 'operational', uptime: 99.99, 
-                lastIncident: 'Nov 28, 2025',
-                activeIncidents: [],
-                scheduledMaintenance: []
-            },
-            { 
-                name: 'New York', code: 'NYC1', flag: '🇺🇸', status: 'degraded', uptime: 99.85,
-                lastIncident: 'Dec 20, 2025',
-                activeIncidents: [{
-                    id: 1,
-                    title: 'Increased API Response Times',
-                    description: 'Some users are experiencing slower API response times in the NYC1 region.',
-                    status: 'investigating',
-                    severity: 'major',
-                    startedAt: 'Dec 20, 2025 14:30 UTC',
-                    updates: [
-                        { status: 'investigating', time: 'Dec 20, 2025 14:45 UTC', message: 'We are investigating reports of increased latency.' },
-                        { status: 'investigating', time: 'Dec 20, 2025 14:30 UTC', message: 'We are aware of degraded performance and are looking into it.' }
-                    ]
-                }],
-                scheduledMaintenance: []
-            },
-            { 
-                name: 'Los Angeles', code: 'LAX1', flag: '🇺🇸', status: 'operational', uptime: 99.99,
-                lastIncident: 'Dec 5, 2025',
-                activeIncidents: [],
-                scheduledMaintenance: []
-            },
-            { 
-                name: 'Miami', code: 'MIA1', flag: '🇺🇸', status: 'operational', uptime: 99.97,
-                lastIncident: 'Dec 1, 2025',
-                activeIncidents: [],
-                scheduledMaintenance: []
-            },
-            { 
-                name: 'Las Vegas', code: 'LAS1', flag: '🇺🇸', status: 'maintenance', uptime: 99.99,
-                lastIncident: 'Nov 15, 2025',
-                activeIncidents: [],
-                scheduledMaintenance: [{
-                    id: 1,
-                    title: 'Network Infrastructure Upgrade',
-                    description: 'Scheduled maintenance to upgrade network infrastructure for improved performance.',
-                    status: 'in_progress',
-                    scheduledStart: 'Dec 21, 2025 02:00 UTC',
-                    scheduledEnd: 'Dec 21, 2025 06:00 UTC',
-                    impact: 'Brief connectivity interruptions possible'
-                }]
-            },
-            { 
-                name: 'Utah', code: 'SLC1', flag: '🇺🇸', status: 'operational', uptime: 99.98,
-                lastIncident: 'Nov 20, 2025',
-                activeIncidents: [],
-                scheduledMaintenance: []
-            },
-            { 
-                name: 'London', code: 'LON1', flag: '🇬🇧', status: 'operational', uptime: 99.99,
-                lastIncident: 'Dec 10, 2025',
-                activeIncidents: [],
-                scheduledMaintenance: []
-            },
-            { 
-                name: 'Frankfurt', code: 'FRA1', flag: '🇩🇪', status: 'operational', uptime: 99.98,
-                lastIncident: 'Dec 8, 2025',
-                activeIncidents: [],
-                scheduledMaintenance: []
-            },
-            { 
-                name: 'Amsterdam', code: 'AMS1', flag: '🇳🇱', status: 'operational', uptime: 99.99,
-                lastIncident: 'Nov 25, 2025',
-                activeIncidents: [],
-                scheduledMaintenance: []
-            },
-            { 
-                name: 'Bern', code: 'BRN1', flag: '🇨🇭', status: 'outage', uptime: 98.50,
-                lastIncident: 'Dec 18, 2025',
-                activeIncidents: [{
-                    id: 1,
-                    title: 'Complete Service Outage',
-                    description: 'All services in Bern region are currently unavailable. Network connectivity issue affecting the entire datacenter.',
-                    status: 'investigating',
-                    severity: 'critical',
-                    startedAt: 'Dec 18, 2025 16:00 UTC',
-                    updates: [
-                        { status: 'investigating', time: 'Dec 18, 2025 16:30 UTC', message: 'Our datacenter partner is investigating a network infrastructure failure. Updates will be provided every 15 minutes.' },
-                        { status: 'investigating', time: 'Dec 18, 2025 16:00 UTC', message: 'We are aware of a complete service outage in the Bern region and are investigating urgently.' }
-                    ]
-                }],
-                scheduledMaintenance: []
-            },
-            { 
-                name: 'Dubai', code: 'DXB1', flag: '🇦🇪', status: 'operational', uptime: 99.96,
-                lastIncident: 'Dec 12, 2025',
-                activeIncidents: [],
-                scheduledMaintenance: []
-            },
-            { 
-                name: 'Singapore', code: 'SIN1', flag: '🇸🇬', status: 'operational', uptime: 99.98,
-                lastIncident: 'Dec 15, 2025',
-                activeIncidents: [],
-                scheduledMaintenance: []
-            }
-        ];
+        // Region status data - reconstructed from data/regions.json, data/incidents.json, data/maintenance.json
+        let REGION_STATUS_DATA = [];
 
-        // Generate 30-day uptime data
-        function generateUptimeDays() {
-            const days = [];
-            for (let i = 0; i < 30; i++) {
-                const rand = Math.random();
-                if (rand > 0.98) days.push('degraded');
-                else if (rand > 0.995) days.push('outage');
-                else days.push('operational');
-            }
-            return days;
+        // Uptime data - loaded from data/uptime.json
+        let UPTIME_DATA = {};
+
+        function getUptimeDays(regionName) {
+            return UPTIME_DATA[regionName] || Array(30).fill('operational');
         }
 
         // SVG icons for status
@@ -2507,7 +2411,7 @@
         function renderRegionCards() {
             const grid = document.getElementById('region-grid');
             grid.innerHTML = REGION_STATUS_DATA.map((region, index) => {
-                const uptimeDays = generateUptimeDays();
+                const uptimeDays = getUptimeDays(region.name);
                 const statusLabels = {
                     operational: 'Operational',
                     degraded: 'Degraded',
@@ -2550,7 +2454,6 @@
                 `;
             }).join('');
         }
-        renderRegionCards();
 
         // Update globe labels with status indicators
         function updateGlobeStatusIndicators() {
@@ -2586,9 +2489,6 @@
             });
         }
         
-        // Call after a short delay to ensure everything is initialized
-        setTimeout(updateGlobeStatusIndicators, 200);
-
         // ============ REGION PANEL FUNCTIONS ============
         let currentRegionIndex = null;
         let currentTab = 'overview';
@@ -2867,7 +2767,89 @@
                 `;
             }).join('');
         }
-        renderLatencyTable();
+
+        // ============ DATA LOADING ============
+        let GLOBAL_STATUS = {};
+
+        function updateGlobalStatus() {
+            const chipEl = document.querySelector('.global-status-chip');
+            const heroStatusEl = document.querySelector('.status-badge-large');
+            const heroMsgEl = document.querySelector('.hero-summary p');
+
+            const statusLabels = {
+                operational: 'All Systems Operational',
+                degraded: 'Some Systems Experiencing Issues',
+                outage: 'Major Outage Detected',
+                maintenance: 'Maintenance In Progress'
+            };
+
+            const statusIcons = {
+                operational: '<svg class="check-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg>',
+                degraded: '<svg class="check-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>',
+                outage: '<svg class="check-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>',
+                maintenance: '<svg class="check-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M22.7 19l-9.1-9.1c.9-2.3.4-5-1.5-6.9-2-2-5-2.4-7.4-1.3L9 6 6 9 1.6 4.7C.4 7.1.9 10.1 2.9 12.1c1.9 1.9 4.6 2.4 6.9 1.5l9.1 9.1c.4.4 1 .4 1.4 0l2.3-2.3c.5-.4.5-1.1.1-1.4z"/></svg>'
+            };
+
+            const label = statusLabels[GLOBAL_STATUS.status] || GLOBAL_STATUS.message || 'Unknown';
+
+            // Update header chip
+            chipEl.className = 'global-status-chip ' + GLOBAL_STATUS.status;
+            chipEl.innerHTML = '<span class="status-dot"></span>' + label;
+
+            // Update hero badge
+            heroStatusEl.className = 'status-badge-large ' + GLOBAL_STATUS.status;
+            heroStatusEl.innerHTML = (statusIcons[GLOBAL_STATUS.status] || '') + ' ' + label;
+
+            // Update hero message
+            heroMsgEl.textContent = GLOBAL_STATUS.message;
+
+            // Update last updated time from API
+            if (GLOBAL_STATUS.lastUpdated) {
+                const timeStr = new Date(GLOBAL_STATUS.lastUpdated).toISOString().replace('T', ' ').slice(0, 19) + ' UTC';
+                document.getElementById('last-update-time').textContent = timeStr;
+            }
+        }
+
+        async function loadData() {
+            try {
+                const [globalStatus, regions, incidents, maintenance, latency, uptime] = await Promise.all([
+                    fetch('data/global-status.json').then(r => r.json()),
+                    fetch('data/regions.json').then(r => r.json()),
+                    fetch('data/incidents.json').then(r => r.json()),
+                    fetch('data/maintenance.json').then(r => r.json()),
+                    fetch('data/latency.json').then(r => r.json()),
+                    fetch('data/uptime.json').then(r => r.json())
+                ]);
+
+                // Populate global variables
+                GLOBAL_STATUS = globalStatus;
+                REGIONS = regions.map(r => ({ ...r, color: 0xD5EBFF }));
+                NETWORK_DELAYS = latency.matrix;
+                UPTIME_DATA = uptime.regions;
+
+                // Reconstruct REGION_STATUS_DATA by joining regions with incidents and maintenance
+                REGION_STATUS_DATA = regions.map(r => ({
+                    ...r,
+                    activeIncidents: incidents.filter(inc => inc.region === r.name),
+                    scheduledMaintenance: maintenance.filter(m => m.region === r.name)
+                }));
+
+                // Initialize globe markers and arcs with loaded data
+                initGlobeRegions();
+                precomputeAllArcs();
+
+                // Render status page UI
+                updateGlobalStatus();
+                renderRegionCards();
+                renderLatencyTable();
+                setTimeout(updateGlobeStatusIndicators, 200);
+
+            } catch (error) {
+                console.error('Failed to load status data:', error);
+            }
+        }
+
+        loadData();
     </script>
 </body>
 </html>

@@ -1,0 +1,122 @@
+[
+  {
+    "name": "Dallas",
+    "code": "DAL1",
+    "flag": "🇺🇸",
+    "lat": 25.78,
+    "lon": 40.80,
+    "status": "operational",
+    "uptime": 99.99,
+    "lastIncident": "Nov 28, 2025"
+  },
+  {
+    "name": "New York",
+    "code": "NYC1",
+    "flag": "🇺🇸",
+    "lat": 40.71,
+    "lon": 6.01,
+    "status": "degraded",
+    "uptime": 99.85,
+    "lastIncident": "Dec 20, 2025"
+  },
+  {
+    "name": "Los Angeles",
+    "code": "LAX1",
+    "flag": "🇺🇸",
+    "lat": 50.05,
+    "lon": 65.24,
+    "status": "operational",
+    "uptime": 99.99,
+    "lastIncident": "Dec 5, 2025"
+  },
+  {
+    "name": "Miami",
+    "code": "MIA1",
+    "flag": "🇺🇸",
+    "lat": 17.76,
+    "lon": 25.19,
+    "status": "operational",
+    "uptime": 99.97,
+    "lastIncident": "Dec 1, 2025"
+  },
+  {
+    "name": "Las Vegas",
+    "code": "LAS1",
+    "flag": "🇺🇸",
+    "lat": 30.17,
+    "lon": 70.14,
+    "status": "maintenance",
+    "uptime": 99.99,
+    "lastIncident": "Nov 15, 2025"
+  },
+  {
+    "name": "Utah",
+    "code": "SLC1",
+    "flag": "🇺🇸",
+    "lat": 32.76,
+    "lon": 60.89,
+    "status": "operational",
+    "uptime": 99.98,
+    "lastIncident": "Nov 20, 2025"
+  },
+  {
+    "name": "London",
+    "code": "LON1",
+    "flag": "🇬🇧",
+    "lat": 50.51,
+    "lon": -69.13,
+    "status": "operational",
+    "uptime": 99.99,
+    "lastIncident": "Dec 10, 2025"
+  },
+  {
+    "name": "Frankfurt",
+    "code": "FRA1",
+    "flag": "🇩🇪",
+    "lat": 50.11,
+    "lon": -95.68,
+    "status": "operational",
+    "uptime": 99.98,
+    "lastIncident": "Dec 8, 2025"
+  },
+  {
+    "name": "Amsterdam",
+    "code": "AMS1",
+    "flag": "🇳🇱",
+    "lat": 52.37,
+    "lon": -78.90,
+    "status": "operational",
+    "uptime": 99.99,
+    "lastIncident": "Nov 25, 2025"
+  },
+  {
+    "name": "Bern",
+    "code": "BRN1",
+    "flag": "🇨🇭",
+    "lat": 45.95,
+    "lon": -87.447,
+    "status": "outage",
+    "uptime": 98.50,
+    "lastIncident": "Dec 18, 2025"
+  },
+  {
+    "name": "Dubai",
+    "code": "DXB1",
+    "flag": "🇦🇪",
+    "lat": 16.00,
+    "lon": 215.99,
+    "status": "operational",
+    "uptime": 99.96,
+    "lastIncident": "Dec 12, 2025"
+  },
+  {
+    "name": "Singapore",
+    "code": "SIN1",
+    "flag": "🇸🇬",
+    "lat": -10.35,
+    "lon": 155.82,
+    "status": "operational",
+    "uptime": 99.98,
+    "lastIncident": "Dec 15, 2025"
+  }
+]
