@@ -1380,6 +1380,21 @@ body {
     }
 }
 
+/* Hide globe on non-desktop screens */
+@media (max-width: 1023px) {
+    .globe-section {
+        display: none !important;
+    }
+
+    #region-tooltip {
+        display: none !important;
+    }
+
+    .main-content {
+        padding-top: 80px;
+    }
+}
+
 @media (max-width: 768px) {
     .header {
         padding: 0 16px;
