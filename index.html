@@ -7,8 +7,8 @@
     <meta name="description" content="Real-time status dashboard for Cloudzy global infrastructure. Monitor uptime, incidents, and network performance across all regions.">
     <meta name="theme-color" content="#0A2540">
     
-    <!-- PWA Configuration -->
-    <link rel="manifest" href="/manifest.json">
+    <!-- PWA Configuration (temporarily disabled) -->
+    <!-- <link rel="manifest" href="/manifest.json"> -->
     
     <!-- iOS PWA Support -->
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -1105,7 +1105,10 @@
         });
 
         // ============ PWA SERVICE WORKER REGISTRATION ============
-        if ('serviceWorker' in navigator) {
+        const PWA_ENABLED = false; // Set to true to re-enable
+        if (!PWA_ENABLED && 'serviceWorker' in navigator) {
+            navigator.serviceWorker.getRegistrations().then(regs => regs.forEach(r => r.unregister()));
+        } else if (PWA_ENABLED && 'serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('/service-worker.js')
                     .then((registration) => {
@@ -1173,20 +1176,19 @@
         // ============ PWA INSTALL PROMPT ============
         let deferredPrompt;
 
-        window.addEventListener('beforeinstallprompt', (e) => {
-            log.info('[PWA] Install prompt available');
-            e.preventDefault();
-            deferredPrompt = e;
-            
-            // You could show a custom install button here
-            // For now, we'll just log it
-            console.log('[PWA] App can be installed');
-        });
+        if (PWA_ENABLED) {
+            window.addEventListener('beforeinstallprompt', (e) => {
+                log.info('[PWA] Install prompt available');
+                e.preventDefault();
+                deferredPrompt = e;
+                console.log('[PWA] App can be installed');
+            });
 
-        window.addEventListener('appinstalled', () => {
-            log.info('[PWA] App installed successfully');
-            deferredPrompt = null;
-        });
+            window.addEventListener('appinstalled', () => {
+                log.info('[PWA] App installed successfully');
+                deferredPrompt = null;
+            });
+        }
 
         // ============ OFFLINE/ONLINE DETECTION ============
         window.addEventListener('online', () => {
