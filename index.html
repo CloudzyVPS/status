@@ -109,7 +109,7 @@
                 <div class="section-header">
                     <div>
                         <h2 class="section-title">Network Health & Inter-Region Latency</h2>
-                        <p class="section-subtitle">Real-time network performance from Dallas (US-Central) hub</p>
+                        <p class="section-subtitle">Real-time network performance from central hub</p>
                     </div>
                 </div>
                 <div class="latency-section">
@@ -238,6 +238,7 @@
         // Shared data variables (used by both globe.js and status page)
         let REGIONS = [];
         let NETWORK_DELAYS = {};
+        let LATENCY_HUB = '';  // API hub region for latency table (e.g. us-dallas)
 
         // ============ STATUS PAGE GENERATION ============
         
@@ -258,6 +259,16 @@
 
         function getUptimeDays(regionName) {
             return UPTIME_DATA[regionName] || Array(30).fill('operational');
+        }
+
+        function formatLastIncident(isoOrNull) {
+            if (!isoOrNull) return 'No incidents';
+            try {
+                const d = new Date(isoOrNull);
+                return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+            } catch {
+                return isoOrNull;
+            }
         }
 
         // SVG icons for status
@@ -434,7 +445,7 @@
                     </div>
                     <div class="stat-card">
                         <div class="stat-label">Last Incident</div>
-                        <div class="stat-value" style="font-size: 16px;">${region.lastIncident || 'No incidents'}</div>
+                        <div class="stat-value" style="font-size: 16px;">${formatLastIncident(region.lastIncident)}</div>
                     </div>
                 </div>
                 ${incidentPreview}
@@ -564,13 +575,27 @@
             if (e.key === 'Escape') closeRegionPanel();
         });
 
-        // Render latency table (from Dallas)
+        // Render latency table (from API hub or first region with data)
         function renderLatencyTable() {
             const tbody = document.querySelector('#latency-table tbody');
-            const dallasDelays = NETWORK_DELAYS['Dallas'];
-            
-            tbody.innerHTML = Object.keys(dallasDelays).map(dest => {
-                const latency = dallasDelays[dest];
+            const subtitleEl = document.querySelector('#latency-section .section-subtitle');
+            const hubSource = LATENCY_HUB || Object.keys(NETWORK_DELAYS)[0];
+            const hubDelays = hubSource ? NETWORK_DELAYS[hubSource] : null;
+
+            if (subtitleEl && hubSource) {
+                const hubRegion = REGIONS.find(r => r.name === hubSource);
+                subtitleEl.textContent = hubRegion
+                    ? `Real-time network performance from ${hubRegion.flag || ''} ${hubSource} hub`
+                    : `Real-time network performance from ${hubSource} hub`;
+            }
+
+            if (!hubDelays || Object.keys(hubDelays).length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" class="empty-state-text">No latency data available yet.</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = Object.keys(hubDelays).map(dest => {
+                const latency = hubDelays[dest];
                 const p95 = Math.round(latency * 1.15);
                 let statusClass, statusText;
                 
@@ -724,7 +749,7 @@
                         name: r.name,
                         status: r.status,
                         uptime: r.uptime,
-                        code: r.regionCode
+                        code: r.code
                     }))
                 });
 
@@ -798,8 +823,9 @@
                     maintenanceItems: maintenanceRes?.length || 0
                 });
 
-                UPTIME_DATA = uptimeRes.regions;
-                NETWORK_DELAYS = latencyRes.matrix;
+                UPTIME_DATA = uptimeRes.regions || {};
+                NETWORK_DELAYS = latencyRes.matrix || {};
+                LATENCY_HUB = latencyRes.hub || '';
 
                 log.debug('Processing Phase 2 data...');
 
@@ -864,7 +890,7 @@
                     phase1Time: `${(performance.now() - phase1Start).toFixed(2)}ms`,
                     phase2Time: `${(performance.now() - phase2Start).toFixed(2)}ms`,
                     regionsLoaded: REGIONS.length,
-                    uptimeDataPoints: Object.values(UPTIME_DATA).reduce((sum, r) => sum + (r?.history?.length || 0), 0),
+                    uptimeDataPoints: Object.values(UPTIME_DATA).reduce((sum, arr) => sum + (Array.isArray(arr) ? arr.length : 0), 0),
                     latencyPairs: Object.keys(NETWORK_DELAYS).length
                 });
 

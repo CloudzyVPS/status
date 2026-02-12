@@ -62,6 +62,29 @@ assert_http() {
   fi
 }
 
+# Assert JSON body has required key(s)
+# Usage: assert_json_has <body> <jq_path...>
+# Example: assert_json_has "$body" .status .regions
+assert_json_has() {
+  local body="$1"
+  shift
+  for path in "$@"; do
+    if ! echo "$body" | jq -e "$path" >/dev/null 2>&1; then
+      return 1
+    fi
+  done
+  return 0
+}
+
+# Assert JSON value; fails if missing or different
+# Usage: assert_json_eq <body> <jq_path> <expected>
+assert_json_eq() {
+  local body="$1" path="$2" expected="$3"
+  local actual
+  actual=$(echo "$body" | jq -r "$path" 2>/dev/null)
+  [ "$actual" = "$expected" ]
+}
+
 # Assert simple 200 for static assets
 assert_ok() {
   local path="$1"

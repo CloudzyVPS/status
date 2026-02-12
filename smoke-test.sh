@@ -12,6 +12,9 @@ set -e
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/lib.sh"
 
+# jq required for data assertions
+command -v jq >/dev/null 2>&1 || { echo "jq required for data assertions (apt install jq)"; exit 1; }
+
 MODE="${1:-}"
 
 # =============================================================================
@@ -51,8 +54,11 @@ scenario_data_flow() {
   if [ "$FETCH_CODE" != "200" ]; then
     log_fail "/health" "$FETCH_CODE" "$FETCH_BODY"
     ERRORS=$((ERRORS + 1))
+  elif ! assert_json_has "$FETCH_BODY" .status .timestamp; then
+    log_fail "/health" "200" "missing .status or .timestamp"
+    ERRORS=$((ERRORS + 1))
   else
-    log_ok "/health" "200"
+    log_ok "/health" "200 (status=$(echo "$FETCH_BODY" | jq -r .status))"
   fi
 
   # Step 2: Main status (critical for first paint)
@@ -61,8 +67,11 @@ scenario_data_flow() {
   if [ "$FETCH_CODE" != "200" ]; then
     log_fail "/api/status/$STATUS_SLUG" "$FETCH_CODE" "$FETCH_BODY"
     ERRORS=$((ERRORS + 1))
+  elif ! assert_json_has "$FETCH_BODY" .tenant .overall_status; then
+    log_fail "/api/status/$STATUS_SLUG" "200" "missing .tenant or .overall_status"
+    ERRORS=$((ERRORS + 1))
   else
-    log_ok "/api/status/$STATUS_SLUG" "200"
+    log_ok "/api/status/$STATUS_SLUG" "200 (overall=$(echo "$FETCH_BODY" | jq -r .overall_status))"
   fi
 
   # Step 3: Regions (phase 1)
@@ -71,8 +80,11 @@ scenario_data_flow() {
   if [ "$FETCH_CODE" != "200" ]; then
     log_fail "/api/status/$STATUS_SLUG/regions" "$FETCH_CODE" "$FETCH_BODY"
     ERRORS=$((ERRORS + 1))
+  elif ! assert_json_has "$FETCH_BODY" .status .message .regions; then
+    log_fail "/api/status/$STATUS_SLUG/regions" "200" "missing .status, .message or .regions"
+    ERRORS=$((ERRORS + 1))
   else
-    log_ok "/api/status/$STATUS_SLUG/regions" "200"
+    log_ok "/api/status/$STATUS_SLUG/regions" "200 (status=$(echo "$FETCH_BODY" | jq -r .status), regions=$(echo "$FETCH_BODY" | jq -r '.regions | length'))"
   fi
 
   # Step 4: Supplementary data (phase 2)
@@ -81,6 +93,18 @@ scenario_data_flow() {
     fetch_url "$API_BASE/api/status/$STATUS_SLUG/regions/$sub"
     if [ "$FETCH_CODE" != "200" ]; then
       log_fail "/api/status/$STATUS_SLUG/regions/$sub" "$FETCH_CODE" "$FETCH_BODY"
+      ERRORS=$((ERRORS + 1))
+    elif [ "$sub" = "uptime" ] && ! assert_json_has "$FETCH_BODY" .days .regions; then
+      log_fail "/api/status/$STATUS_SLUG/regions/uptime" "200" "missing .days or .regions"
+      ERRORS=$((ERRORS + 1))
+    elif [ "$sub" = "latency" ] && ! assert_json_has "$FETCH_BODY" .unit .matrix; then
+      log_fail "/api/status/$STATUS_SLUG/regions/latency" "200" "missing .unit or .matrix"
+      ERRORS=$((ERRORS + 1))
+    elif [ "$sub" = "incidents" ] && ! echo "$FETCH_BODY" | jq -e 'type == "array"' >/dev/null 2>&1; then
+      log_fail "/api/status/$STATUS_SLUG/regions/incidents" "200" "expected array"
+      ERRORS=$((ERRORS + 1))
+    elif [ "$sub" = "maintenance" ] && ! echo "$FETCH_BODY" | jq -e 'type == "array"' >/dev/null 2>&1; then
+      log_fail "/api/status/$STATUS_SLUG/regions/maintenance" "200" "expected array"
       ERRORS=$((ERRORS + 1))
     else
       log_ok "/api/status/$STATUS_SLUG/regions/$sub" "200"
