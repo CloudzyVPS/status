@@ -210,7 +210,12 @@
         </div>
     </div>
 
+    <script src="config.js"></script>
     <script>
+        // Config loaded from config.js (source: config.json)
+        const STATUS_API_BASE = (window.STATUS_CONFIG || {}).apiBase || 'https://monitoring.cloudzy.com';
+        const STATUS_PAGE_SLUG = (window.STATUS_CONFIG || {}).statusSlug || 'uptime';
+
         // Theme toggle
         function toggleTheme() {
             const html = document.documentElement;
@@ -625,8 +630,6 @@
         }
 
         // ============ DATA LOADING ============
-        const STATUS_API_BASE = 'https://monitoring.cloudzy.com';
-        const STATUS_PAGE_SLUG = 'uptime';
 
         let GLOBAL_STATUS = {};
 
@@ -709,6 +712,25 @@
             });
         }
 
+        const LOAD_RETRIES = 3;
+        const LOAD_RETRY_DELAY = 2000;
+
+        async function fetchWithRetry(url, retries = LOAD_RETRIES) {
+            for (let i = 0; i < retries; i++) {
+                try {
+                    const res = await fetch(url);
+                    if (res.ok) return res;
+                    if (i === retries - 1) return res;
+                    log.warn(`Fetch failed (${res.status}), retry ${i + 1}/${retries} in ${LOAD_RETRY_DELAY}ms`);
+                    await new Promise(r => setTimeout(r, LOAD_RETRY_DELAY));
+                } catch (err) {
+                    if (i === retries - 1) throw err;
+                    log.warn(`Fetch error (${err.message}), retry ${i + 1}/${retries} in ${LOAD_RETRY_DELAY}ms`);
+                    await new Promise(r => setTimeout(r, LOAD_RETRY_DELAY));
+                }
+            }
+        }
+
         async function loadData() {
             log.info('Starting initial data load', {
                 phase: 'PHASE_1_CRITICAL',
@@ -720,10 +742,10 @@
             try {
                 const base = `${STATUS_API_BASE}/api/status/${STATUS_PAGE_SLUG}`;
 
-                // Phase 1: critical data for first paint (regions endpoint)
+                // Phase 1: critical data for first paint (regions endpoint) - with retries
                 log.debug('Fetching critical regions data...');
                 const phase1Start = performance.now();
-                const regionsRes = await fetch(`${base}/regions`);
+                const regionsRes = await fetchWithRetry(`${base}/regions`);
                 
                 log.info('Regions API response received', {
                     status: regionsRes.status,
@@ -740,12 +762,13 @@
                 }
 
                 const regionsData = await regionsRes.json();
+                const regionsList = Array.isArray(regionsData?.regions) ? regionsData.regions : [];
                 
                 log.info('Regions data parsed successfully', {
                     globalStatus: regionsData.status,
-                    regionCount: regionsData.regions?.length || 0,
+                    regionCount: regionsList.length,
                     dataSize: JSON.stringify(regionsData).length + ' bytes',
-                    regions: regionsData.regions?.map(r => ({
+                    regions: regionsList.map(r => ({
                         name: r.name,
                         status: r.status,
                         uptime: r.uptime,
@@ -758,8 +781,8 @@
                     message: regionsData.message,
                     lastUpdated: regionsData.lastUpdated
                 };
-                REGIONS = regionsData.regions.map(r => ({ ...r, color: 0xD5EBFF }));
-                REGION_STATUS_DATA = regionsData.regions.map(r => ({
+                REGIONS = regionsList.map(r => ({ ...r, color: 0xD5EBFF }));
+                REGION_STATUS_DATA = regionsList.map(r => ({
                     ...r,
                     activeIncidents: [],       // filled in phase 2
                     scheduledMaintenance: []
@@ -796,43 +819,52 @@
                 });
 
                 const phase2Start = performance.now();
-                const [uptimeRes, latencyRes, incidentsRes, maintenanceRes] = await Promise.all([
+                const phase2Results = await Promise.allSettled([
                     fetch(`${base}/regions/uptime`).then(r => {
                         log.debug('Uptime API response received', { status: r.status });
-                        return r.json();
+                        return r.ok ? r.json() : null;
                     }),
                     fetch(`${base}/regions/latency`).then(r => {
                         log.debug('Latency API response received', { status: r.status });
-                        return r.json();
+                        return r.ok ? r.json() : null;
                     }),
                     fetch(`${base}/regions/incidents`).then(r => {
                         log.debug('Incidents API response received', { status: r.status });
-                        return r.json();
+                        return r.ok ? r.json() : null;
                     }),
                     fetch(`${base}/regions/maintenance`).then(r => {
                         log.debug('Maintenance API response received', { status: r.status });
-                        return r.json();
+                        return r.ok ? r.json() : null;
                     })
                 ]);
 
+                const uptimeRes = phase2Results[0].status === 'fulfilled' ? phase2Results[0].value : null;
+                const latencyRes = phase2Results[1].status === 'fulfilled' ? phase2Results[1].value : null;
+                const incidentsRes = (phase2Results[2]?.status === 'fulfilled' && Array.isArray(phase2Results[2].value)) ? phase2Results[2].value : [];
+                const maintenanceRes = (phase2Results[3]?.status === 'fulfilled' && Array.isArray(phase2Results[3].value)) ? phase2Results[3].value : [];
+
+                phase2Results.forEach((p, i) => {
+                    if (p.status === 'rejected') log.warn(`Phase 2 fetch ${['uptime','latency','incidents','maintenance'][i]} failed`, p.reason);
+                });
+
                 log.info('Phase 2 parallel fetch complete', {
                     fetchTime: `${(performance.now() - phase2Start).toFixed(2)}ms`,
-                    uptimeRegions: Object.keys(uptimeRes.regions || {}).length,
-                    latencyMatrixSize: Object.keys(latencyRes.matrix || {}).length,
+                    uptimeRegions: Object.keys(uptimeRes?.regions || {}).length,
+                    latencyMatrixSize: Object.keys(latencyRes?.matrix || {}).length,
                     activeIncidents: incidentsRes?.length || 0,
                     maintenanceItems: maintenanceRes?.length || 0
                 });
 
-                UPTIME_DATA = uptimeRes.regions || {};
-                NETWORK_DELAYS = latencyRes.matrix || {};
-                LATENCY_HUB = latencyRes.hub || '';
+                UPTIME_DATA = uptimeRes?.regions || {};
+                NETWORK_DELAYS = latencyRes?.matrix || {};
+                LATENCY_HUB = latencyRes?.hub || '';
 
                 log.debug('Processing Phase 2 data...');
 
                 // Re-attach incidents/maintenance to region data
                 REGION_STATUS_DATA = REGION_STATUS_DATA.map(r => {
-                    const incidents = incidentsRes.filter(inc => inc.region === r.name);
-                    const maintenance = maintenanceRes.filter(m => m.region === r.name);
+                    const incidents = (incidentsRes || []).filter(inc => inc.region === r.name);
+                    const maintenance = (maintenanceRes || []).filter(m => m.region === r.name);
                     
                     if (incidents.length > 0 || maintenance.length > 0) {
                         log.debug(`Region ${r.name} has active issues`, {

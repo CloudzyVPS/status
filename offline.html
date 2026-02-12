@@ -291,6 +291,7 @@
         </div>
     </div>
 
+    <script src="config.js"></script>
     <script>
         // Initialize theme from localStorage
         (function() {
@@ -359,19 +360,43 @@
             }
         }
 
-        // Monitor online/offline status
-        function updateNetworkStatus() {
+        // Config from config.js (source: config.json)
+        const API_BASE = (self.STATUS_CONFIG || window.STATUS_CONFIG || {}).apiBase || 'https://monitoring.cloudzy.com';
+
+        // Check if API is online via /health
+        async function checkApiHealth() {
+            if (!navigator.onLine) return false;
+            try {
+                const res = await fetch(`${API_BASE}/health`, { cache: 'no-store' });
+                if (!res.ok) return false;
+                const data = await res.json();
+                return data && data.status === 'ok';
+            } catch {
+                return false;
+            }
+        }
+
+        // Monitor status: network + API health
+        async function updateNetworkStatus() {
             const statusEl = document.getElementById('network-status');
             const statusText = document.getElementById('status-text');
-            
-            if (navigator.onLine) {
-                statusEl.classList.remove('offline');
-                statusEl.classList.add('online');
-                statusText.textContent = 'Connection restored! Click reload to refresh';
-            } else {
+
+            if (!navigator.onLine) {
                 statusEl.classList.remove('online');
                 statusEl.classList.add('offline');
                 statusText.textContent = 'You are offline';
+                return;
+            }
+
+            const apiOk = await checkApiHealth();
+            if (apiOk) {
+                statusEl.classList.remove('offline');
+                statusEl.classList.add('online');
+                statusText.textContent = 'API is online! Click reload to refresh';
+            } else {
+                statusEl.classList.remove('online');
+                statusEl.classList.add('offline');
+                statusText.textContent = 'Waiting for API... (checking /health)';
             }
         }
 
@@ -382,20 +407,8 @@
         // Check initial status
         updateNetworkStatus();
 
-        // Periodic check (every 5 seconds)
-        setInterval(() => {
-            if (navigator.onLine) {
-                fetch('/', { method: 'HEAD', cache: 'no-cache' })
-                    .then(() => {
-                        if (!document.getElementById('network-status').classList.contains('online')) {
-                            updateNetworkStatus();
-                        }
-                    })
-                    .catch(() => {
-                        // Still offline
-                    });
-            }
-        }, 5000);
+        // Periodic check (every 5 seconds) - verify API /health
+        setInterval(updateNetworkStatus, 5000);
 
         // Log offline page load
         console.log('[Offline Page] Loaded at', new Date().toISOString());

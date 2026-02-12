@@ -8,6 +8,11 @@
 
 # X_IDENTIFIER: if set, passed as x-identifier header; default empty (header omitted when empty)
 : "${X_IDENTIFIER:=}"
+# API_BASE from config.json (single source of truth); fallback if jq unavailable
+_config_dir="$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")" 2>/dev/null && pwd)"
+if [ -n "$_config_dir" ] && [ -f "$_config_dir/config.json" ] && command -v jq >/dev/null 2>&1; then
+  : "${API_BASE:=$(jq -r '.apiBase' "$_config_dir/config.json")}"
+fi
 : "${API_BASE:=https://monitoring.cloudzy.com}"
 : "${STATUS_SLUG:=uptime}"
 : "${STATUS_BASE:=http://localhost:8765}"

@@ -1,4 +1,10 @@
 // Service Worker for Cloudzy Status PWA
+// Config from config.js (source: config.json)
+importScripts('config.js');
+const CFG = self.STATUS_CONFIG || {};
+const API_BASE = CFG.apiBase || 'https://monitoring.cloudzy.com';
+const STATUS_SLUG = CFG.statusSlug || 'uptime';
+
 const CACHE_NAME = 'cloudzy-status-v1';
 const STATIC_CACHE = 'cloudzy-status-static-v1';
 const API_CACHE = 'cloudzy-status-api-v1';
@@ -7,6 +13,7 @@ const API_CACHE = 'cloudzy-status-api-v1';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
+  '/config.js',
   '/style.css',
   '/align-ui.css',
   '/globe.js',
@@ -68,7 +75,7 @@ self.addEventListener('fetch', (event) => {
   }
 
   // API requests - Network first, fallback to cache, then offline page
-  if (url.pathname.startsWith('/api/') || url.hostname === 'monitoring.cloudzy.com') {
+  if (url.pathname.startsWith('/api/') || url.hostname === new URL(API_BASE).hostname) {
     event.respondWith(
       fetch(request)
         .then((response) => {
@@ -168,7 +175,7 @@ self.addEventListener('sync', (event) => {
   if (event.tag === 'sync-status') {
     event.waitUntil(
       // Attempt to refresh status data
-      fetch('https://monitoring.cloudzy.com/api/status/uptime/regions')
+      fetch(`${API_BASE}/api/status/${STATUS_SLUG}/regions`)
         .then((response) => {
           if (response.ok) {
             console.log('[Service Worker] Background sync successful');
