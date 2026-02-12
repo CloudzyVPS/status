@@ -584,9 +584,46 @@
         }
 
         // ============ DATA LOADING ============
+        const STATUS_API_BASE = 'https://monitoring.cloudzy.com';
+        const STATUS_PAGE_SLUG = 'uptime';
+
         let GLOBAL_STATUS = {};
 
+        // Logging utility with timestamps and context
+        const log = {
+            info: (message, data = null) => {
+                const timestamp = new Date().toISOString();
+                console.log(`[${timestamp}] [INFO] ${message}`, data || '');
+            },
+            warn: (message, data = null) => {
+                const timestamp = new Date().toISOString();
+                console.warn(`[${timestamp}] [WARN] ${message}`, data || '');
+            },
+            error: (message, error = null) => {
+                const timestamp = new Date().toISOString();
+                console.error(`[${timestamp}] [ERROR] ${message}`, error || '');
+            },
+            debug: (message, data = null) => {
+                const timestamp = new Date().toISOString();
+                console.debug(`[${timestamp}] [DEBUG] ${message}`, data || '');
+            }
+        };
+
+        // Log initial configuration
+        log.info('Status Page Initialized', {
+            apiBase: STATUS_API_BASE,
+            pageSlug: STATUS_PAGE_SLUG,
+            userAgent: navigator.userAgent,
+            viewport: `${window.innerWidth}x${window.innerHeight}`,
+            timestamp: new Date().toISOString()
+        });
+
         function updateGlobalStatus() {
+            log.debug('Updating global status UI', {
+                currentStatus: GLOBAL_STATUS.status,
+                message: GLOBAL_STATUS.message,
+                lastUpdated: GLOBAL_STATUS.lastUpdated
+            });
             const chipEl = document.querySelector('.global-status-chip');
             const heroStatusEl = document.querySelector('.status-badge-large');
             const heroMsgEl = document.querySelector('.hero-summary p');
@@ -622,85 +659,381 @@
             if (GLOBAL_STATUS.lastUpdated) {
                 const timeStr = new Date(GLOBAL_STATUS.lastUpdated).toISOString().replace('T', ' ').slice(0, 19) + ' UTC';
                 document.getElementById('last-update-time').textContent = timeStr;
+                log.debug('Updated last-update timestamp', { time: timeStr });
             }
+
+            log.info('Global status UI updated successfully', {
+                appliedStatus: GLOBAL_STATUS.status,
+                label: statusLabels[GLOBAL_STATUS.status]
+            });
         }
 
         async function loadData() {
+            log.info('Starting initial data load', {
+                phase: 'PHASE_1_CRITICAL',
+                endpoint: `${STATUS_API_BASE}/api/status/${STATUS_PAGE_SLUG}/regions`
+            });
+
+            const loadStartTime = performance.now();
+
             try {
-                // Intentional 1-second delay for testing loading indicators
-                await new Promise(resolve => setTimeout(resolve, 1000));
+                const base = `${STATUS_API_BASE}/api/status/${STATUS_PAGE_SLUG}`;
 
-                const [globalStatus, regions, incidents, maintenance, latency, uptime] = await Promise.all([
-                    fetch('data/global-status.json').then(r => r.json()),
-                    fetch('data/regions.json').then(r => r.json()),
-                    fetch('data/incidents.json').then(r => r.json()),
-                    fetch('data/maintenance.json').then(r => r.json()),
-                    fetch('data/latency.json').then(r => r.json()),
-                    fetch('data/uptime.json').then(r => r.json())
-                ]);
+                // Phase 1: critical data for first paint (regions endpoint)
+                log.debug('Fetching critical regions data...');
+                const phase1Start = performance.now();
+                const regionsRes = await fetch(`${base}/regions`);
+                
+                log.info('Regions API response received', {
+                    status: regionsRes.status,
+                    statusText: regionsRes.statusText,
+                    headers: {
+                        contentType: regionsRes.headers.get('content-type'),
+                        contentLength: regionsRes.headers.get('content-length')
+                    },
+                    responseTime: `${(performance.now() - phase1Start).toFixed(2)}ms`
+                });
 
-                // Populate global variables
-                GLOBAL_STATUS = globalStatus;
-                REGIONS = regions.map(r => ({ ...r, color: 0xD5EBFF }));
-                NETWORK_DELAYS = latency.matrix;
-                UPTIME_DATA = uptime.regions;
+                if (!regionsRes.ok) {
+                    throw new Error(`API returned ${regionsRes.status}: ${regionsRes.statusText}`);
+                }
 
-                // Reconstruct REGION_STATUS_DATA by joining regions with incidents and maintenance
-                REGION_STATUS_DATA = regions.map(r => ({
+                const regionsData = await regionsRes.json();
+                
+                log.info('Regions data parsed successfully', {
+                    globalStatus: regionsData.status,
+                    regionCount: regionsData.regions?.length || 0,
+                    dataSize: JSON.stringify(regionsData).length + ' bytes',
+                    regions: regionsData.regions?.map(r => ({
+                        name: r.name,
+                        status: r.status,
+                        uptime: r.uptime,
+                        code: r.regionCode
+                    }))
+                });
+
+                GLOBAL_STATUS = {
+                    status: regionsData.status,
+                    message: regionsData.message,
+                    lastUpdated: regionsData.lastUpdated
+                };
+                REGIONS = regionsData.regions.map(r => ({ ...r, color: 0xD5EBFF }));
+                REGION_STATUS_DATA = regionsData.regions.map(r => ({
                     ...r,
-                    activeIncidents: incidents.filter(inc => inc.region === r.name),
-                    scheduledMaintenance: maintenance.filter(m => m.region === r.name)
+                    activeIncidents: [],       // filled in phase 2
+                    scheduledMaintenance: []
                 }));
 
-                // Globe-dependent operations (only if globe.js is loaded)
-                function initGlobeWithData() {
-                    initGlobeRegions();
-                    precomputeAllArcs();
-                    document.getElementById('globe-section').classList.remove('loading');
-                    setTimeout(updateGlobeStatusIndicators, 200);
-                }
+                log.info('Phase 1 data processing complete', {
+                    totalTime: `${(performance.now() - phase1Start).toFixed(2)}ms`,
+                    globalStatus: GLOBAL_STATUS.status,
+                    regionsLoaded: REGIONS.length
+                });
 
-                if (typeof initGlobeRegions === 'function') {
-                    initGlobeWithData();
-                } else {
-                    // globe.js hasn't loaded yet — store callback for it to pick up
-                    window._pendingGlobeInit = initGlobeWithData;
-                }
-
-                // Render status page UI and remove loading states
+                // Render first paint immediately
+                log.debug('Rendering Phase 1 UI components...');
                 updateGlobalStatus();
                 document.getElementById('header-status').classList.remove('loading');
                 document.getElementById('hero-section').classList.remove('loading');
 
                 renderRegionCards();
                 document.getElementById('regions-section').classList.remove('loading');
+                
+                log.info('Phase 1 UI render complete - First paint achieved', {
+                    timeToFirstPaint: `${(performance.now() - loadStartTime).toFixed(2)}ms`
+                });
+
+                // Phase 2: supplementary data (parallel, non-blocking)
+                log.info('Starting Phase 2 data load (parallel fetch)', {
+                    phase: 'PHASE_2_SUPPLEMENTARY',
+                    endpoints: [
+                        `${base}/regions/uptime`,
+                        `${base}/regions/latency`,
+                        `${base}/regions/incidents`,
+                        `${base}/regions/maintenance`
+                    ]
+                });
+
+                const phase2Start = performance.now();
+                const [uptimeRes, latencyRes, incidentsRes, maintenanceRes] = await Promise.all([
+                    fetch(`${base}/regions/uptime`).then(r => {
+                        log.debug('Uptime API response received', { status: r.status });
+                        return r.json();
+                    }),
+                    fetch(`${base}/regions/latency`).then(r => {
+                        log.debug('Latency API response received', { status: r.status });
+                        return r.json();
+                    }),
+                    fetch(`${base}/regions/incidents`).then(r => {
+                        log.debug('Incidents API response received', { status: r.status });
+                        return r.json();
+                    }),
+                    fetch(`${base}/regions/maintenance`).then(r => {
+                        log.debug('Maintenance API response received', { status: r.status });
+                        return r.json();
+                    })
+                ]);
+
+                log.info('Phase 2 parallel fetch complete', {
+                    fetchTime: `${(performance.now() - phase2Start).toFixed(2)}ms`,
+                    uptimeRegions: Object.keys(uptimeRes.regions || {}).length,
+                    latencyMatrixSize: Object.keys(latencyRes.matrix || {}).length,
+                    activeIncidents: incidentsRes?.length || 0,
+                    maintenanceItems: maintenanceRes?.length || 0
+                });
+
+                UPTIME_DATA = uptimeRes.regions;
+                NETWORK_DELAYS = latencyRes.matrix;
+
+                log.debug('Processing Phase 2 data...');
+
+                // Re-attach incidents/maintenance to region data
+                REGION_STATUS_DATA = REGION_STATUS_DATA.map(r => {
+                    const incidents = incidentsRes.filter(inc => inc.region === r.name);
+                    const maintenance = maintenanceRes.filter(m => m.region === r.name);
+                    
+                    if (incidents.length > 0 || maintenance.length > 0) {
+                        log.debug(`Region ${r.name} has active issues`, {
+                            incidents: incidents.length,
+                            maintenance: maintenance.length
+                        });
+                    }
+
+                    return {
+                        ...r,
+                        activeIncidents: incidents,
+                        scheduledMaintenance: maintenance
+                    };
+                });
+
+                log.info('Phase 2 data processing complete', {
+                    regionsWithIncidents: REGION_STATUS_DATA.filter(r => r.activeIncidents.length > 0).length,
+                    regionsWithMaintenance: REGION_STATUS_DATA.filter(r => r.scheduledMaintenance.length > 0).length
+                });
+
+                // Re-render with full data
+                log.debug('Re-rendering UI with complete data...');
+                renderRegionCards();
+                document.getElementById('regions-section').classList.remove('loading');
 
                 renderLatencyTable();
                 document.getElementById('latency-section').classList.remove('loading');
+                
+                log.info('Phase 2 UI render complete', {
+                    totalPhase2Time: `${(performance.now() - phase2Start).toFixed(2)}ms`
+                });
+
+                // Globe-dependent operations (only if globe.js is loaded)
+                function initGlobeWithData() {
+                    log.info('Initializing 3D globe with region data');
+                    initGlobeRegions();
+                    precomputeAllArcs();
+                    document.getElementById('globe-section').classList.remove('loading');
+                    setTimeout(updateGlobeStatusIndicators, 200);
+                    log.info('Globe initialization complete');
+                }
+
+                if (typeof initGlobeRegions === 'function') {
+                    log.debug('Globe.js already loaded, initializing immediately');
+                    initGlobeWithData();
+                } else {
+                    log.debug('Globe.js not yet loaded, deferring initialization');
+                    // globe.js hasn't loaded yet — store callback for it to pick up
+                    window._pendingGlobeInit = initGlobeWithData;
+                }
+
+                const totalLoadTime = performance.now() - loadStartTime;
+                log.info('✅ Complete data load finished successfully', {
+                    totalTime: `${totalLoadTime.toFixed(2)}ms`,
+                    phase1Time: `${(performance.now() - phase1Start).toFixed(2)}ms`,
+                    phase2Time: `${(performance.now() - phase2Start).toFixed(2)}ms`,
+                    regionsLoaded: REGIONS.length,
+                    uptimeDataPoints: Object.values(UPTIME_DATA).reduce((sum, r) => sum + (r?.history?.length || 0), 0),
+                    latencyPairs: Object.keys(NETWORK_DELAYS).length
+                });
 
             } catch (error) {
-                console.error('Failed to load status data:', error);
+                log.error('❌ Failed to load status data', {
+                    error: error.message,
+                    stack: error.stack,
+                    endpoint: `${STATUS_API_BASE}/api/status/${STATUS_PAGE_SLUG}`,
+                    timestamp: new Date().toISOString()
+                });
+                
+                // Show user-friendly error
+                const heroSection = document.getElementById('hero-section');
+                if (heroSection) {
+                    heroSection.innerHTML = `
+                        <div style="text-align: center; padding: 40px;">
+                            <h2 style="color: #ef4444;">Unable to Load Status Data</h2>
+                            <p style="color: #6b7280; margin-top: 10px;">Please check your connection and try again.</p>
+                            <button onclick="location.reload()" style="margin-top: 20px; padding: 10px 20px; background: #3b82f6; color: white; border: none; border-radius: 8px; cursor: pointer;">
+                                Reload Page
+                            </button>
+                        </div>
+                    `;
+                }
             }
         }
 
+        log.info('Initiating initial data load...');
         loadData();
+
+        // Auto-refresh: /regions endpoint every 5 minutes
+        const REFRESH_INTERVAL = 5 * 60 * 1000; // 5 minutes
+
+        log.info('Auto-refresh configured', {
+            interval: `${REFRESH_INTERVAL / 1000}s (${REFRESH_INTERVAL / 60000} minutes)`,
+            endpoint: '/regions',
+            nextRefresh: new Date(Date.now() + REFRESH_INTERVAL).toISOString()
+        });
+
+        async function refreshRegions() {
+            log.info('🔄 Starting auto-refresh', {
+                type: 'SCHEDULED_REFRESH',
+                endpoint: `${STATUS_API_BASE}/api/status/${STATUS_PAGE_SLUG}/regions`,
+                timestamp: new Date().toISOString()
+            });
+
+            const refreshStart = performance.now();
+
+            try {
+                const base = `${STATUS_API_BASE}/api/status/${STATUS_PAGE_SLUG}`;
+                const res = await fetch(`${base}/regions`);
+                
+                log.debug('Refresh API response received', {
+                    status: res.status,
+                    responseTime: `${(performance.now() - refreshStart).toFixed(2)}ms`
+                });
+
+                if (!res.ok) {
+                    log.warn('Refresh request failed', {
+                        status: res.status,
+                        statusText: res.statusText
+                    });
+                    return;
+                }
+
+                const data = await res.json();
+
+                // Track changes
+                const statusChanged = GLOBAL_STATUS.status !== data.status;
+                const changedRegions = [];
+
+                GLOBAL_STATUS = {
+                    status: data.status,
+                    message: data.message,
+                    lastUpdated: data.lastUpdated
+                };
+
+                // Update region statuses in-place (preserve existing incidents/maintenance)
+                for (const updated of data.regions) {
+                    const existing = REGION_STATUS_DATA.find(r => r.name === updated.name);
+                    if (existing) {
+                        if (existing.status !== updated.status) {
+                            changedRegions.push({
+                                name: existing.name,
+                                oldStatus: existing.status,
+                                newStatus: updated.status
+                            });
+                        }
+                        existing.status = updated.status;
+                        existing.uptime = updated.uptime;
+                        existing.incidentCount = updated.incidentCount;
+                        existing.maintenanceCount = updated.maintenanceCount;
+                    }
+                }
+
+                updateGlobalStatus();
+                renderRegionCards();
+                updateTimestamp();
+
+                log.info('✅ Auto-refresh completed successfully', {
+                    refreshTime: `${(performance.now() - refreshStart).toFixed(2)}ms`,
+                    globalStatusChanged: statusChanged,
+                    newGlobalStatus: data.status,
+                    regionsChanged: changedRegions.length,
+                    changes: changedRegions.length > 0 ? changedRegions : 'none',
+                    nextRefresh: new Date(Date.now() + REFRESH_INTERVAL).toISOString()
+                });
+
+            } catch (e) {
+                log.error('❌ Region refresh failed', {
+                    error: e.message,
+                    stack: e.stack,
+                    refreshTime: `${(performance.now() - refreshStart).toFixed(2)}ms`,
+                    nextRetry: new Date(Date.now() + REFRESH_INTERVAL).toISOString()
+                });
+            }
+        }
+
+        setInterval(refreshRegions, REFRESH_INTERVAL);
 
         // Conditionally load globe only on desktop (large screens)
         const isDesktop = window.matchMedia('(min-width: 1024px)').matches;
+        
+        log.info('Device detection', {
+            isDesktop: isDesktop,
+            viewport: `${window.innerWidth}x${window.innerHeight}`,
+            devicePixelRatio: window.devicePixelRatio,
+            userAgent: navigator.userAgent
+        });
+
         if (isDesktop) {
+            log.info('Loading 3D globe scripts for desktop view...');
             const threeScript = document.createElement('script');
             threeScript.src = 'https://unpkg.com/three@0.160.0/build/three.min.js';
             threeScript.onload = function() {
+                log.info('Three.js library loaded successfully', {
+                    version: '0.160.0',
+                    source: 'unpkg CDN'
+                });
                 const globeScript = document.createElement('script');
                 globeScript.src = 'globe.js';
+                globeScript.onload = function() {
+                    log.info('Globe.js script loaded successfully');
+                };
+                globeScript.onerror = function() {
+                    log.error('Failed to load globe.js script');
+                };
                 document.body.appendChild(globeScript);
+            };
+            threeScript.onerror = function() {
+                log.error('Failed to load Three.js library from CDN');
             };
             document.head.appendChild(threeScript);
         } else {
+            log.info('Mobile/tablet device detected - Globe disabled', {
+                reason: 'viewport width < 1024px',
+                globeSectionHidden: true
+            });
             // Hide globe section on small screens
             document.getElementById('globe-section').style.display = 'none';
             document.getElementById('region-tooltip').style.display = 'none';
         }
+
+        // Log page visibility changes
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) {
+                log.info('Page hidden - User switched tab/minimized window');
+            } else {
+                log.info('Page visible - User returned to tab', {
+                    timeSinceLastUpdate: GLOBAL_STATUS.lastUpdated 
+                        ? `${((Date.now() - new Date(GLOBAL_STATUS.lastUpdated).getTime()) / 1000).toFixed(0)}s ago`
+                        : 'unknown'
+                });
+            }
+        });
+
+        // Log when page is about to unload
+        window.addEventListener('beforeunload', () => {
+            log.info('Page unloading - User navigating away or closing tab');
+        });
+
+        log.info('Status page initialization complete', {
+            timestamp: new Date().toISOString(),
+            readyState: document.readyState
+        });
     </script>
 </body>
 </html>
