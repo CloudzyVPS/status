@@ -1,87 +1,140 @@
 #!/bin/bash
-# Smoke test for monitoring.cloudzy.com – all public endpoints
-# Usage: ./smoke-test.sh [local]
-#   local  - test static assets on localhost:8765 as well
-#   (default) - API only on monitoring.cloudzy.com
+# Smoke test – full scenario for monitoring.cloudzy.com and status-page
 #
-# Env: X_IDENTIFIER (required)
-#      API_BASE - override API host (e.g. http://localhost:3001 for local backend)
+# Usage: ./smoke-test.sh [local]
+#   local  - also test static assets on localhost:8765
+#   (default) - API endpoints only
+#
+# Env: X_IDENTIFIER, API_BASE, STATUS_BASE, STATUS_SLUG, CURL_TIMEOUT
+#      See lib.sh for defaults.
 
 set -e
-IDENTIFIER="${X_IDENTIFIER:?X_IDENTIFIER must be set and not exposed}"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$SCRIPT_DIR/lib.sh"
+
 MODE="${1:-}"
-ERRORS=0
 
-CURL_OPTS=(-sS -w "\n%{http_code}" -H "x-identifier: $IDENTIFIER" -H "User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36" -H "Accept: application/json, text/plain, */*")
+# =============================================================================
+# Scenario: Status API availability
+# =============================================================================
+# Verifies all public monitoring.cloudzy.com endpoints respond correctly.
+# Prerequisites: API_BASE points to monitoring backend
+# Expected: 200 (or 404 for disabled incidents, 301/302 for redirects)
+# =============================================================================
+scenario_api_availability() {
+  echo "--- Scenario: API Availability ($API_BASE) ---"
+  reset_errors
 
-curl_req() {
-  curl "${CURL_OPTS[@]}" "$@"
+  while IFS= read -r path; do
+    [ -z "$path" ] && continue
+    fetch_url "$API_BASE$path"
+    assert_http "$path" "$FETCH_CODE" "$FETCH_BODY"
+  done < <(get_api_endpoints)
+
+  return $ERRORS
 }
 
-echo "=== Smoke test monitoring.cloudzy.com (x-identifier: ***) ==="
-echo ""
-
-# Real API (production); override with API_BASE env for local testing
-API_BASE="${API_BASE:-https://monitoring.cloudzy.com}"
-BASE="http://localhost:8765"
-
-# All public endpoints
-ENDPOINTS=(
-  "/health"
-  "/robots.txt"
-  "/sitemap.xml"
-  "/api-docs"
-  "/api-docs.json"
-  "/api/status/uptime"
-  "/api/status/uptime/incidents.json"
-  "/api/status/uptime/incidents.rss"
-  "/api/status/uptime/regions"
-  "/api/status/uptime/regions/uptime"
-  "/api/status/uptime/regions/latency"
-  "/api/status/uptime/regions/incidents"
-  "/api/status/uptime/regions/maintenance"
-)
-
-echo "--- All Endpoints ($API_BASE) ---"
-for path in "${ENDPOINTS[@]}"; do
-  out=$(curl_req "$API_BASE$path")
-  code=$(echo "$out" | tail -n1)
-  body=$(echo "$out" | sed '$d')
-  # incidents.json/rss may return 404 when announcements disabled
-  # /api-docs may redirect (302) then 200
-  if [ "$code" = "200" ]; then
-    echo "  OK $path -> $code"
-  elif [ "$code" = "404" ] && [[ "$path" == *"incidents"* ]]; then
-    echo "  OK $path -> $code (announcements disabled)"
-  elif [ "$code" = "302" ] && [[ "$path" == "/api-docs" ]]; then
-    echo "  OK $path -> $code (redirect)"
-  else
-    echo "  FAIL $path -> $code"
-    echo "    Response: ${body:0:80}..."
-    ERRORS=$((ERRORS + 1))
-  fi
-done
-
-# Static assets (only when local)
-if [ "$MODE" = "local" ]; then
+# =============================================================================
+# Scenario: Status page data flow
+# =============================================================================
+# Simulates the status-page fetch sequence: health → regions → supplementary.
+# Validates critical path for the dashboard to load.
+# =============================================================================
+scenario_data_flow() {
   echo ""
-  echo "--- Static Assets ($BASE) ---"
-  for path in "/" "/offline.html" "/manifest.json" "/style.css" "/align-ui.css" "/globe.js" "/service-worker.js"; do
-    code=$(curl -sS -o /dev/null -w "%{http_code}" -H "x-identifier: $IDENTIFIER" -H "User-Agent: Mozilla/5.0" "$BASE$path")
-    if [ "$code" = "200" ]; then
-      echo "  OK $path -> $code"
-    else
-      echo "  FAIL $path -> $code"
+  echo "--- Scenario: Status Page Data Flow ---"
+  reset_errors
+
+  # Step 1: Health check
+  echo "  Step 1: Health check"
+  fetch_url "$API_BASE/health"
+  if [ "$FETCH_CODE" != "200" ]; then
+    log_fail "/health" "$FETCH_CODE" "$FETCH_BODY"
+    ERRORS=$((ERRORS + 1))
+  else
+    log_ok "/health" "200"
+  fi
+
+  # Step 2: Main status (critical for first paint)
+  echo "  Step 2: Main status ($STATUS_SLUG)"
+  fetch_url "$API_BASE/api/status/$STATUS_SLUG"
+  if [ "$FETCH_CODE" != "200" ]; then
+    log_fail "/api/status/$STATUS_SLUG" "$FETCH_CODE" "$FETCH_BODY"
+    ERRORS=$((ERRORS + 1))
+  else
+    log_ok "/api/status/$STATUS_SLUG" "200"
+  fi
+
+  # Step 3: Regions (phase 1)
+  echo "  Step 3: Regions"
+  fetch_url "$API_BASE/api/status/$STATUS_SLUG/regions"
+  if [ "$FETCH_CODE" != "200" ]; then
+    log_fail "/api/status/$STATUS_SLUG/regions" "$FETCH_CODE" "$FETCH_BODY"
+    ERRORS=$((ERRORS + 1))
+  else
+    log_ok "/api/status/$STATUS_SLUG/regions" "200"
+  fi
+
+  # Step 4: Supplementary data (phase 2)
+  echo "  Step 4: Supplementary (uptime, latency, incidents, maintenance)"
+  for sub in uptime latency incidents maintenance; do
+    fetch_url "$API_BASE/api/status/$STATUS_SLUG/regions/$sub"
+    if [ "$FETCH_CODE" != "200" ]; then
+      log_fail "/api/status/$STATUS_SLUG/regions/$sub" "$FETCH_CODE" "$FETCH_BODY"
       ERRORS=$((ERRORS + 1))
+    else
+      log_ok "/api/status/$STATUS_SLUG/regions/$sub" "200"
     fi
   done
+
+  return $ERRORS
+}
+
+# =============================================================================
+# Scenario: Static assets (local only)
+# =============================================================================
+# Verifies status-page static files when served locally.
+# Prerequisites: python3 -m http.server 8765 in status-page dir
+# =============================================================================
+scenario_static_assets() {
+  echo ""
+  echo "--- Scenario: Static Assets ($STATUS_BASE) ---"
+  reset_errors
+
+  while IFS= read -r path; do
+    [ -z "$path" ] && continue
+    code=$(curl_req_simple "$STATUS_BASE$path")
+    assert_ok "$path" "$code"
+  done < <(get_static_paths)
+
+  return $ERRORS
+}
+
+# =============================================================================
+# Main
+# =============================================================================
+
+echo "=== Smoke Test ==="
+echo ""
+
+TOTAL_ERRORS=0
+
+# Run API availability scenario
+scenario_api_availability || TOTAL_ERRORS=$((TOTAL_ERRORS + ERRORS))
+
+# Run data flow scenario (validates critical path)
+scenario_data_flow || TOTAL_ERRORS=$((TOTAL_ERRORS + ERRORS))
+
+# Run static assets scenario when in local mode
+if [ "$MODE" = "local" ]; then
+  scenario_static_assets || TOTAL_ERRORS=$((TOTAL_ERRORS + ERRORS))
 fi
 
 echo ""
-if [ $ERRORS -eq 0 ]; then
-  echo "=== All requests passed (no errors) ==="
+if [ $TOTAL_ERRORS -eq 0 ]; then
+  echo "=== All scenarios passed (no errors) ==="
   exit 0
 else
-  echo "=== $ERRORS request(s) failed ==="
+  echo "=== $TOTAL_ERRORS request(s) failed ==="
   exit 1
 fi
