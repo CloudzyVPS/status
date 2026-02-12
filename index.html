@@ -4,6 +4,22 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="robots" content="noindex, nofollow">
+    <meta name="description" content="Real-time status dashboard for Cloudzy global infrastructure. Monitor uptime, incidents, and network performance across all regions.">
+    <meta name="theme-color" content="#0A2540">
+    
+    <!-- PWA Configuration -->
+    <link rel="manifest" href="/manifest.json">
+    
+    <!-- iOS PWA Support -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Cloudzy Status">
+    <link rel="apple-touch-icon" href="/icons/icon-192x192.png">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/icons/icon-16x16.png">
+    
     <title>Cloudzy Status - Service Status Dashboard</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -860,19 +876,9 @@
                     timestamp: new Date().toISOString()
                 });
                 
-                // Show user-friendly error
-                const heroSection = document.getElementById('hero-section');
-                if (heroSection) {
-                    heroSection.innerHTML = `
-                        <div style="text-align: center; padding: 40px;">
-                            <h2 style="color: #ef4444;">Unable to Load Status Data</h2>
-                            <p style="color: #6b7280; margin-top: 10px;">Please check your connection and try again.</p>
-                            <button onclick="location.reload()" style="margin-top: 20px; padding: 10px 20px; background: #3b82f6; color: white; border: none; border-radius: 8px; cursor: pointer;">
-                                Reload Page
-                            </button>
-                        </div>
-                    `;
-                }
+                // Show offline page
+                log.error('Redirecting to offline page');
+                window.location.href = '/offline.html';
             }
         }
 
@@ -1033,6 +1039,110 @@
         log.info('Status page initialization complete', {
             timestamp: new Date().toISOString(),
             readyState: document.readyState
+        });
+
+        // ============ PWA SERVICE WORKER REGISTRATION ============
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/service-worker.js')
+                    .then((registration) => {
+                        log.info('[PWA] Service Worker registered successfully', {
+                            scope: registration.scope,
+                            active: !!registration.active,
+                            installing: !!registration.installing,
+                            waiting: !!registration.waiting
+                        });
+
+                        // Check for updates every 5 minutes
+                        setInterval(() => {
+                            registration.update().then(() => {
+                                log.debug('[PWA] Checked for service worker updates');
+                            });
+                        }, 5 * 60 * 1000);
+
+                        // Handle service worker updates
+                        registration.addEventListener('updatefound', () => {
+                            const newWorker = registration.installing;
+                            log.info('[PWA] Service Worker update found');
+                            
+                            newWorker.addEventListener('statechange', () => {
+                                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                    log.info('[PWA] New Service Worker installed, update available');
+                                    
+                                    // Optionally notify user about update
+                                    // You could show a toast/banner here
+                                    console.log('[PWA] A new version is available. Refresh to update.');
+                                }
+                            });
+                        });
+                    })
+                    .catch((error) => {
+                        log.error('[PWA] Service Worker registration failed', {
+                            error: error.message,
+                            stack: error.stack
+                        });
+                    });
+
+                // Listen for messages from service worker
+                navigator.serviceWorker.addEventListener('message', (event) => {
+                    log.info('[PWA] Message from Service Worker', event.data);
+                    
+                    if (event.data.type === 'DATA_REFRESHED') {
+                        log.info('[PWA] Data refreshed by background sync');
+                        // Optionally reload data without full page refresh
+                        loadData();
+                    }
+                });
+
+                // Handle controller change (new service worker activated)
+                navigator.serviceWorker.addEventListener('controllerchange', () => {
+                    log.info('[PWA] Service Worker controller changed');
+                    // Optionally reload the page
+                    if (confirm('A new version is available. Reload to update?')) {
+                        window.location.reload();
+                    }
+                });
+            });
+        } else {
+            log.warn('[PWA] Service Workers are not supported in this browser');
+        }
+
+        // ============ PWA INSTALL PROMPT ============
+        let deferredPrompt;
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            log.info('[PWA] Install prompt available');
+            e.preventDefault();
+            deferredPrompt = e;
+            
+            // You could show a custom install button here
+            // For now, we'll just log it
+            console.log('[PWA] App can be installed');
+        });
+
+        window.addEventListener('appinstalled', () => {
+            log.info('[PWA] App installed successfully');
+            deferredPrompt = null;
+        });
+
+        // ============ OFFLINE/ONLINE DETECTION ============
+        window.addEventListener('online', () => {
+            log.info('[Network] Connection restored - Back online');
+            // Reload data when connection is restored
+            loadData();
+        });
+
+        window.addEventListener('offline', () => {
+            log.warn('[Network] Connection lost - Now offline');
+            // Show a subtle notification that user is offline
+        });
+
+        // Log initial connection state
+        log.info('[Network] Initial connection state', {
+            online: navigator.onLine,
+            effectiveType: navigator.connection?.effectiveType,
+            downlink: navigator.connection?.downlink,
+            rtt: navigator.connection?.rtt
         });
     </script>
 </body>

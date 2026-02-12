@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Offline - Cloudzy Status</title>
+    <link rel="stylesheet" href="align-ui.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        html { scroll-behavior: smooth; }
+        
+        body { 
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-background);
+            color: var(--text-strong);
+            line-height: 1.6;
+            overflow-x: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .offline-container {
+            max-width: 600px;
+            text-align: center;
+            animation: fadeIn 0.6s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .offline-icon {
+            width: 120px;
+            height: 120px;
+            margin: 0 auto 32px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+                box-shadow: 0 0 0 0 rgba(102, 126, 234, 0.7);
+            }
+            50% {
+                transform: scale(1.05);
+                box-shadow: 0 0 0 20px rgba(102, 126, 234, 0);
+            }
+        }
+
+        .offline-icon svg {
+            width: 60px;
+            height: 60px;
+            fill: white;
+        }
+
+        h1 {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            color: var(--text-strong);
+        }
+
+        .subtitle {
+            font-size: 18px;
+            color: var(--text-moderate);
+            margin-bottom: 32px;
+            line-height: 1.6;
+        }
+
+        .offline-details {
+            background: var(--bg-white);
+            border: 1px solid var(--stroke-soft);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 32px;
+            text-align: left;
+        }
+
+        .offline-details h3 {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: var(--text-strong);
+        }
+
+        .offline-details ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .offline-details li {
+            padding: 8px 0;
+            padding-left: 28px;
+            position: relative;
+            color: var(--text-moderate);
+            font-size: 14px;
+        }
+
+        .offline-details li:before {
+            content: "→";
+            position: absolute;
+            left: 8px;
+            color: var(--state-information-base);
+            font-weight: bold;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            text-decoration: none;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s ease;
+        }
+
+        .btn-primary {
+            background: var(--btn-primary-bg);
+            color: var(--btn-primary-text);
+        }
+
+        .btn-primary:hover {
+            background: var(--btn-primary-bg-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+
+        .btn-secondary {
+            background: var(--bg-subtle);
+            color: var(--text-strong);
+            border: 1px solid var(--stroke-soft);
+        }
+
+        .btn-secondary:hover {
+            background: var(--bg-white);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn svg {
+            width: 16px;
+            height: 16px;
+            fill: currentColor;
+        }
+
+        .network-status {
+            margin-top: 24px;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .network-status.online {
+            background: var(--state-positive-lighter);
+            color: var(--state-positive-dark);
+            border: 1px solid var(--state-positive-light);
+        }
+
+        .network-status.offline {
+            background: var(--state-critical-lighter);
+            color: var(--state-critical-dark);
+            border: 1px solid var(--state-critical-light);
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: currentColor;
+            animation: blink 1.5s ease-in-out infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        .logo {
+            margin-bottom: 24px;
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--text-strong);
+        }
+
+        @media (max-width: 640px) {
+            .offline-icon {
+                width: 100px;
+                height: 100px;
+            }
+
+            .offline-icon svg {
+                width: 50px;
+                height: 50px;
+            }
+
+            h1 {
+                font-size: 28px;
+            }
+
+            .subtitle {
+                font-size: 16px;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="offline-container">
+        <div class="logo">Cloudzy Status</div>
+        
+        <div class="offline-icon">
+            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+            </svg>
+        </div>
+
+        <h1>Unable to Load Status Data</h1>
+        <p class="subtitle">
+            It looks like you're offline or there's a connectivity issue. 
+            This app works best with an active internet connection.
+        </p>
+
+        <div class="offline-details">
+            <h3>What you can do:</h3>
+            <ul>
+                <li>Check your internet connection</li>
+                <li>Try reloading the page</li>
+                <li>Check if your firewall is blocking the connection</li>
+                <li>Wait a moment and try again</li>
+            </ul>
+        </div>
+
+        <div class="action-buttons">
+            <button class="btn btn-primary" onclick="forceRefresh()" id="reload-btn">
+                <svg viewBox="0 0 24 24">
+                    <path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/>
+                </svg>
+                <span id="reload-text">Reload & Clear Cache</span>
+            </button>
+            
+            <a href="/" class="btn btn-secondary">
+                <svg viewBox="0 0 24 24">
+                    <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
+                </svg>
+                Go Home
+            </a>
+        </div>
+
+        <div class="network-status offline" id="network-status">
+            <span class="status-dot"></span>
+            <span id="status-text">You are offline</span>
+        </div>
+    </div>
+
+    <script>
+        // Initialize theme from localStorage
+        (function() {
+            const saved = localStorage.getItem('theme');
+            if (saved) {
+                document.documentElement.setAttribute('data-theme', saved);
+            } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                document.documentElement.setAttribute('data-theme', 'dark');
+            }
+        })();
+
+        // Force refresh - Clear all caches and reload
+        async function forceRefresh() {
+            const reloadBtn = document.getElementById('reload-btn');
+            const reloadText = document.getElementById('reload-text');
+            
+            // Update button state
+            reloadBtn.disabled = true;
+            reloadText.textContent = 'Clearing cache...';
+            
+            console.log('[Offline Page] Force refresh initiated');
+            
+            try {
+                // Step 1: Clear all caches
+                if ('caches' in window) {
+                    console.log('[Offline Page] Clearing all caches...');
+                    const cacheNames = await caches.keys();
+                    await Promise.all(
+                        cacheNames.map(cacheName => {
+                            console.log('[Offline Page] Deleting cache:', cacheName);
+                            return caches.delete(cacheName);
+                        })
+                    );
+                    console.log('[Offline Page] All caches cleared');
+                }
+                
+                // Step 2: Unregister service worker (force update)
+                if ('serviceWorker' in navigator) {
+                    console.log('[Offline Page] Unregistering service workers...');
+                    const registrations = await navigator.serviceWorker.getRegistrations();
+                    await Promise.all(
+                        registrations.map(registration => {
+                            console.log('[Offline Page] Unregistering:', registration);
+                            return registration.unregister();
+                        })
+                    );
+                    console.log('[Offline Page] All service workers unregistered');
+                }
+                
+                reloadText.textContent = 'Reloading...';
+                
+                // Step 3: Hard reload (bypass cache)
+                console.log('[Offline Page] Performing hard reload');
+                setTimeout(() => {
+                    window.location.href = window.location.origin + '/?nocache=' + Date.now();
+                }, 500);
+                
+            } catch (error) {
+                console.error('[Offline Page] Error during force refresh:', error);
+                reloadText.textContent = 'Error - Trying anyway...';
+                
+                // Fallback: just do a hard reload
+                setTimeout(() => {
+                    window.location.reload(true);
+                }, 1000);
+            }
+        }
+
+        // Monitor online/offline status
+        function updateNetworkStatus() {
+            const statusEl = document.getElementById('network-status');
+            const statusText = document.getElementById('status-text');
+            
+            if (navigator.onLine) {
+                statusEl.classList.remove('offline');
+                statusEl.classList.add('online');
+                statusText.textContent = 'Connection restored! Click reload to refresh';
+            } else {
+                statusEl.classList.remove('online');
+                statusEl.classList.add('offline');
+                statusText.textContent = 'You are offline';
+            }
+        }
+
+        // Listen for online/offline events
+        window.addEventListener('online', updateNetworkStatus);
+        window.addEventListener('offline', updateNetworkStatus);
+
+        // Check initial status
+        updateNetworkStatus();
+
+        // Periodic check (every 5 seconds)
+        setInterval(() => {
+            if (navigator.onLine) {
+                fetch('/', { method: 'HEAD', cache: 'no-cache' })
+                    .then(() => {
+                        if (!document.getElementById('network-status').classList.contains('online')) {
+                            updateNetworkStatus();
+                        }
+                    })
+                    .catch(() => {
+                        // Still offline
+                    });
+            }
+        }, 5000);
+
+        // Log offline page load
+        console.log('[Offline Page] Loaded at', new Date().toISOString());
+    </script>
+</body>
+</html>
