@@ -5,6 +5,9 @@ export const state = {
   regionStatusData: [],
   uptimeData: {},
   globalStatus: {},
+  announcements: [],
+  incidentFeed: [],
+  statusPageMeta: {},
 };
 
 export function updateState(patch) {

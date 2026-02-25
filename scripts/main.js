@@ -5,6 +5,7 @@ import { initTheme, bindThemeToggle } from './theme.js';
 import { initPanelControls, openRegionPanel } from './render/panel.js';
 import { loadData } from './data/loadData.js';
 import { initPwa } from './pwa.js';
+import { getIncidentFeedRssUrl } from './api/statusApi.js';
 
 function initNetworkListeners() {
   window.addEventListener('online', () => {
@@ -39,6 +40,12 @@ async function bootstrap() {
   initPanelControls();
   initNetworkListeners();
   initPwa(log, PWA_ENABLED);
+
+  // Wire up RSS feed links (header + section)
+  const rssUrl = getIncidentFeedRssUrl();
+  document.querySelectorAll('#rss-feed-link, #rss-feed-link-section').forEach((el) => {
+    if (el) el.href = rssUrl;
+  });
 
   await loadData(log, openRegionPanel);
 

@@ -5,6 +5,37 @@ import { INCIDENT_ICON, MAINTENANCE_ICON, STATUS_ICONS, STATUS_LABELS } from '..
 let currentRegionIndex = null;
 let currentTab = 'overview';
 
+/**
+ * Find announcements that affect a given region (matched by group name or label).
+ */
+function announcementsForRegion(region) {
+  const all = state.announcements || [];
+  if (!region) return { incidents: [], maintenance: [] };
+
+  const regionName = (region.name || '').toLowerCase();
+
+  const matching = all.filter((a) => {
+    // If announcement has group_ids or label_ids, try to match by region name
+    // For the public page the most reliable match is via the region name appearing
+    // in the announcement's linked group/service names.  Since the public payload
+    // doesn't always carry the resolved group names we also fall back to checking
+    // service_ids overlap with region services.
+    if (a._regionMatch === regionName) return true;
+
+    // Simple heuristic: match title/summary containing the region name
+    const title = (a.title || '').toLowerCase();
+    const summary = (a.summary || '').toLowerCase();
+    if (regionName && (title.includes(regionName) || summary.includes(regionName))) return true;
+
+    return false;
+  });
+
+  return {
+    incidents: matching.filter((a) => a.type === 'incident'),
+    maintenance: matching.filter((a) => a.type === 'maintenance'),
+  };
+}
+
 export function openRegionPanel(index) {
   currentRegionIndex = index;
   const region = state.regionStatusData[index];
@@ -150,8 +181,11 @@ function renderOverviewTab(region) {
 
 function renderIncidentsTab(region) {
   const hasIncidents = region.activeIncidents && region.activeIncidents.length > 0;
+  // Also check announcements state for richer incident data
+  const regionAnnouncements = announcementsForRegion(region);
+  const announcementIncidents = regionAnnouncements.incidents;
 
-  if (!hasIncidents) {
+  if (!hasIncidents && announcementIncidents.length === 0) {
     return `
       <div class="empty-state">
           <svg class="empty-state-icon" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg>
@@ -160,22 +194,73 @@ function renderIncidentsTab(region) {
     `;
   }
 
-  return region.activeIncidents
-    .map(
-      (incident) => `
+  // Render announcement-sourced incidents (richer, with entries timeline)
+  let html = '';
+  if (announcementIncidents.length > 0) {
+    html += announcementIncidents.map((a) => {
+      const statusLabel = a.status ? a.status.charAt(0).toUpperCase() + a.status.slice(1).replace(/_/g, ' ') : 'Unknown';
+      const entries = (a.entries || []).filter((e) => e.visibility !== 'internal');
+      const timelineHtml = entries.length > 0 ? `
+        <div class="status-updates">
+            <div class="status-updates-title">Status Updates</div>
+            ${entries.map((entry) => {
+              const entryStatus = entry.status ? entry.status.charAt(0).toUpperCase() + entry.status.slice(1) : '';
+              const entryTime = entry.created_at ? new Date(entry.created_at).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : '';
+              return `
+                <div class="update-item">
+                    <div class="update-dot ${entry.status || ''}"></div>
+                    <div class="update-content">
+                        <div class="update-header">
+                            <span class="update-status">${entryStatus}</span>
+                            <span class="update-time">${entryTime}</span>
+                        </div>
+                        <div class="update-message">${entry.message || ''}</div>
+                    </div>
+                </div>
+              `;
+            }).join('')}
+        </div>
+      ` : '';
+
+      return `
         <div class="incident-card">
             <div class="incident-header">
-                <span class="incident-status-badge ${incident.status}">
+                <span class="incident-status-badge ${a.status || ''}">
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M11 15h2v2h-2zm0-8h2v6h-2zm.99-5C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2z"/></svg>
-                    ${incident.status.charAt(0).toUpperCase() + incident.status.slice(1)}
+                    ${statusLabel}
                 </span>
-                <span class="severity-badge ${incident.severity}">${incident.severity.charAt(0).toUpperCase() + incident.severity.slice(1)}</span>
             </div>
-            <div class="incident-title">${incident.title}</div>
-            <div class="incident-description">${incident.description}</div>
+            <div class="incident-title">${a.title || 'Untitled incident'}</div>
+            <div class="incident-description">${a.summary || ''}</div>
             <div class="incident-meta">
-                Started: ${incident.startedAt} • <span class="ongoing">Ongoing</span>
+                ${a.starts_at ? 'Started: ' + new Date(a.starts_at).toLocaleString() : ''}
+                ${a.resolved_at ? ' • Resolved: ' + new Date(a.resolved_at).toLocaleString() : !['resolved', 'completed'].includes(a.status) ? ' • <span class="ongoing">Ongoing</span>' : ''}
             </div>
+            ${timelineHtml}
+        </div>
+      `;
+    }).join('');
+  }
+
+  // Render region-level incidents (from /regions/incidents endpoint)
+  if (hasIncidents) {
+    html += region.activeIncidents
+      .map(
+        (incident) => `
+        <div class="incident-card">
+            <div class="incident-header">
+                <span class="incident-status-badge ${incident.status || ''}">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M11 15h2v2h-2zm0-8h2v6h-2zm.99-5C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2z"/></svg>
+                    ${(incident.status || 'unknown').charAt(0).toUpperCase() + (incident.status || 'unknown').slice(1)}
+                </span>
+                ${incident.severity ? `<span class="severity-badge ${incident.severity}">${incident.severity.charAt(0).toUpperCase() + incident.severity.slice(1)}</span>` : ''}
+            </div>
+            <div class="incident-title">${incident.title || ''}</div>
+            <div class="incident-description">${incident.description || incident.summary || ''}</div>
+            <div class="incident-meta">
+                Started: ${incident.startedAt || incident.starts_at || ''} • <span class="ongoing">Ongoing</span>
+            </div>
+            ${incident.updates && incident.updates.length ? `
             <div class="status-updates">
                 <div class="status-updates-title">Status Updates</div>
                 ${incident.updates
@@ -195,16 +280,22 @@ function renderIncidentsTab(region) {
                   )
                   .join('')}
             </div>
+            ` : ''}
         </div>
     `
-    )
-    .join('');
+      )
+      .join('');
+  }
+
+  return html;
 }
 
 function renderMaintenanceTab(region) {
   const hasMaintenance = region.scheduledMaintenance && region.scheduledMaintenance.length > 0;
+  const regionAnnouncements = announcementsForRegion(region);
+  const announcementMaintenance = regionAnnouncements.maintenance;
 
-  if (!hasMaintenance) {
+  if (!hasMaintenance && announcementMaintenance.length === 0) {
     return `
       <div class="empty-state">
           <svg class="empty-state-icon" viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.31.06-.63.06-.94 0-.31-.02-.63-.06-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.04.31-.06.63-.06.94s.02.63.06.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>
@@ -213,9 +304,60 @@ function renderMaintenanceTab(region) {
     `;
   }
 
-  return region.scheduledMaintenance
-    .map(
-      (maint) => `
+  let html = '';
+
+  // Announcement-sourced maintenance
+  if (announcementMaintenance.length > 0) {
+    html += announcementMaintenance.map((a) => {
+      const statusLabel = a.status ? a.status.charAt(0).toUpperCase() + a.status.slice(1).replace(/_/g, ' ') : 'Scheduled';
+      const entries = (a.entries || []).filter((e) => e.visibility !== 'internal');
+      const timelineHtml = entries.length > 0 ? `
+        <div class="status-updates">
+            <div class="status-updates-title">Updates</div>
+            ${entries.map((entry) => {
+              const entryStatus = entry.status ? entry.status.charAt(0).toUpperCase() + entry.status.slice(1) : '';
+              const entryTime = entry.created_at ? new Date(entry.created_at).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : '';
+              return `
+                <div class="update-item">
+                    <div class="update-dot ${entry.status || ''}"></div>
+                    <div class="update-content">
+                        <div class="update-header">
+                            <span class="update-status">${entryStatus}</span>
+                            <span class="update-time">${entryTime}</span>
+                        </div>
+                        <div class="update-message">${entry.message || ''}</div>
+                    </div>
+                </div>
+              `;
+            }).join('')}
+        </div>
+      ` : '';
+
+      return `
+        <div class="incident-card">
+            <div class="incident-header">
+                <span class="incident-status-badge" style="background: var(--state-information-lighter); color: var(--state-information-base);">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M22.7 19l-9.1-9.1c.9-2.3.4-5-1.5-6.9-2-2-5-2.4-7.4-1.3L9 6 6 9 1.6 4.7C.4 7.1.9 10.1 2.9 12.1c1.9 1.9 4.6 2.4 6.9 1.5l9.1 9.1c.4.4 1 .4 1.4 0l2.3-2.3c.5-.4.5-1.1.1-1.4z"/></svg>
+                    ${statusLabel}
+                </span>
+            </div>
+            <div class="incident-title">${a.title || 'Scheduled Maintenance'}</div>
+            <div class="incident-description">${a.summary || ''}</div>
+            <div class="incident-meta">
+                ${a.starts_at ? 'Scheduled: ' + new Date(a.starts_at).toLocaleString() : 'Scheduled: TBD'}
+                ${a.ends_at ? ' → ' + new Date(a.ends_at).toLocaleString() : ''}
+            </div>
+            ${timelineHtml}
+        </div>
+      `;
+    }).join('');
+  }
+
+  // Region-level maintenance (from /regions/maintenance endpoint)
+  if (hasMaintenance) {
+    html += region.scheduledMaintenance
+      .map(
+        (maint) => `
         <div class="incident-card">
             <div class="incident-header">
                 <span class="incident-status-badge" style="background: var(--state-information-lighter); color: var(--state-information-base);">
@@ -223,16 +365,19 @@ function renderMaintenanceTab(region) {
                     Scheduled / In Progress
                 </span>
             </div>
-            <div class="incident-title">${maint.title}</div>
-            <div class="incident-description">${maint.description}</div>
+            <div class="incident-title">${maint.title || ''}</div>
+            <div class="incident-description">${maint.description || maint.summary || ''}</div>
             <div class="incident-meta">
-                Scheduled: ${maint.scheduledStart || 'TBD'} ${maint.scheduledEnd ? '→ ' + maint.scheduledEnd : ''}
+                Scheduled: ${maint.scheduledStart || maint.starts_at || 'TBD'} ${maint.scheduledEnd || maint.ends_at ? '→ ' + (maint.scheduledEnd || maint.ends_at) : ''}
             </div>
             <div class="incident-meta" style="color: var(--text-subtle);">Impact: ${maint.impact || 'Moderate'}</div>
         </div>
     `
-    )
-    .join('');
+      )
+      .join('');
+  }
+
+  return html;
 }
 
 function renderLatencyTab(region) {
